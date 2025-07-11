@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Appetito" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="SplashTheme" parent="Theme.SplashScreen">
+        <item name = "windowSplashScreenBackground">@color/white</item>
+        <item name = "postSplashScreenTheme">@style/Theme.Appetito</item>
+        <item name = "windowSplashScreenAnimatedIcon">@drawable/animated_logo</item>
+    </style>
+</resources>
