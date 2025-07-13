@@ -61,5 +61,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Splash Screen
     implementation(libs.core.splashscreen)
+
+    //sdp and ssp
+    implementation(libs.sdp.compose)
 }
