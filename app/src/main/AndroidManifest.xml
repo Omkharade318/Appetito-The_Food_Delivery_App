@@ -11,6 +11,7 @@
         android:roundIcon="@drawable/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/SplashTheme"
+        android:name=".AppetitoApp"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
