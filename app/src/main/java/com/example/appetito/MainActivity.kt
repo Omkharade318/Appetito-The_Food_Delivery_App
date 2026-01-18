@@ -2,6 +2,7 @@ package com.example.appetito
 
 import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
@@ -18,18 +19,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.appetito.data.FoodApi
+import com.example.appetito.ui.features.auth.AuthScreen
 import com.example.appetito.ui.theme.AppetitoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     // Controls whether to keep the splash screen visible
     var showSplashScreen = true
+
+    @Inject
+    lateinit var foodApi: FoodApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Initialize the splash screen before the super call
@@ -87,12 +94,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppetitoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Box(modifier = Modifier.padding(innerPadding))
+                    AuthScreen()
                 }
             }
+        }
+
+        if(::foodApi.isInitialized){
+            Log.d("MainActivity", "FoodApi is initialized")
         }
 
         CoroutineScope(Dispatchers.Main).launch {
