@@ -21,6 +21,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.appetito.data.FoodApi
 import com.example.appetito.ui.features.auth.AuthScreen
+import com.example.appetito.ui.features.auth.signup.SignUpScreen
 import com.example.appetito.ui.theme.AppetitoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -94,8 +95,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppetitoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding))
-                    AuthScreen()
+                    Box(modifier = Modifier.padding(innerPadding)){
+                        SignUpScreen()
+                    }
                 }
             }
         }
