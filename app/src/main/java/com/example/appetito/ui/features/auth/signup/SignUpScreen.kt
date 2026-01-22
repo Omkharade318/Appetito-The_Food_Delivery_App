@@ -1,5 +1,12 @@
 package com.example.appetito.ui.features.auth.signup
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,9 +19,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,27 +40,40 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.appetito.R
 import com.example.appetito.ui.FoodHubTextField
 import com.example.appetito.ui.GroupSocialButtons
 import com.example.appetito.ui.theme.Orange
 
 @Composable
-fun SignUpScreen() {
+fun SignUpScreen(
+    viewModel: SignUpViewModel = hiltViewModel()
+) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        var name by remember {
-            mutableStateOf("")
-        }
+        val name = viewModel.name.collectAsStateWithLifecycle()
+        val email= viewModel.email.collectAsStateWithLifecycle()
+        val password = viewModel.password.collectAsStateWithLifecycle()
+        val errorMessage = remember { mutableStateOf<String?>(null) }
+        val loading = remember { mutableStateOf(false) }
 
-        var email by remember {
-            mutableStateOf("")
+        val uiState = viewModel.uiState.collectAsState()
+        when(uiState.value){
+            is SignUpViewModel.SignUpEvent.Error -> {
+                loading.value = false
+                errorMessage.value = "Failed"
+            }
+            is SignUpViewModel.SignUpEvent.Loading -> {
+                loading.value = true
+                errorMessage.value = null
+            }
+            else -> {
+                loading.value = false
+                errorMessage.value = null
+            }
         }
-
-        var password by remember {
-            mutableStateOf("")
-        }
-
 
         Image(
             painter = painterResource(id = R.drawable.auth_bg),
@@ -79,8 +101,8 @@ fun SignUpScreen() {
             Spacer(modifier = Modifier.size(20.dp))
 
             FoodHubTextField(
-                value = name,
-                onValueChange = {name = it},
+                value = name.value,
+                onValueChange = {viewModel.onNameChange(it)},
                 label = {
                     Text(
                         text = stringResource(id = R.string.full_name),
@@ -95,8 +117,8 @@ fun SignUpScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             FoodHubTextField(
-                value = email,
-                onValueChange = {email = it},
+                value = email.value,
+                onValueChange = {viewModel.onEmailChange(it)},
                 label = {
                     Text(
                         text = stringResource(id = R.string.email),
@@ -111,8 +133,8 @@ fun SignUpScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             FoodHubTextField(
-                value = password,
-                onValueChange = {password = it},
+                value = password.value,
+                onValueChange = {viewModel.onPasswordChange(it)},
                 label = {
                     Text(text = stringResource(
                         id = R.string.password),
@@ -135,18 +157,41 @@ fun SignUpScreen() {
             Spacer(modifier = Modifier.size(16.dp))
 
             Button(
-                onClick = {},
+                onClick = viewModel::onSignUpClick,
                 modifier = Modifier
                     .height(60.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Orange)
             ) {
-                Text(
-                    text = stringResource(id = R.string.sign_up),
-                    modifier = Modifier
-                        .padding(horizontal = 48.dp),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
-                )
+                Box{
+                    AnimatedContent(
+                        targetState = loading.value,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(300)) +
+                                    scaleIn(initialScale = 0.8f) togetherWith
+                                    fadeOut(animationSpec = tween(300)) +
+                                    scaleOut(targetScale = 0.8f)
+                        }
+                    ) { target ->
+                        if(target) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .padding(horizontal = 48.dp),
+                                color = Color.White
+                            )
+                        }else{
+                            Text(
+                                text = stringResource(id = R.string.sign_up),
+                                modifier = Modifier
+                                    .padding(horizontal = 48.dp),
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+
+
+                }
+
 
             }
 
