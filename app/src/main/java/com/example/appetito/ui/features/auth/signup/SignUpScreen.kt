@@ -1,5 +1,6 @@
 package com.example.appetito.ui.features.auth.signup
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,13 +45,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.appetito.R
 import com.example.appetito.ui.FoodHubTextField
 import com.example.appetito.ui.GroupSocialButtons
+import com.example.appetito.ui.navigation.AuthScreen
+import com.example.appetito.ui.navigation.Home
+import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.theme.Orange
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SignUpScreen(
+    navController: NavController,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -72,6 +82,27 @@ fun SignUpScreen(
             else -> {
                 loading.value = false
                 errorMessage.value = null
+            }
+        }
+
+        LaunchedEffect(true) {
+            viewModel.navigationEvent.collectLatest { event ->
+                when(event){
+                    is SignUpViewModel.SignUpNavigationEvent.NavigationToHome -> {
+                        navController.navigate(Home){
+                            popUpTo(AuthScreen){
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    is SignUpViewModel.SignUpNavigationEvent.NavigationToLogin -> {
+                        navController.navigate(Login)
+                    }
+
+
+                }
+
             }
         }
 
@@ -156,6 +187,7 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.size(16.dp))
 
+            Text(text = errorMessage.value ?: "", color = Color.Red)
             Button(
                 onClick = viewModel::onSignUpClick,
                 modifier = Modifier
@@ -202,7 +234,9 @@ fun SignUpScreen(
                 text = stringResource(id = R.string.already_have_account),
                 modifier = Modifier
                     .padding(8.dp)
-                    .clickable { }
+                    .clickable {
+                        viewModel.onLoginClicked()
+                    }
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
@@ -223,5 +257,6 @@ fun SignUpScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewSignUpScreen(){
-    SignUpScreen()
+    val navController = rememberNavController()
+    SignUpScreen(navController = navController)
 }

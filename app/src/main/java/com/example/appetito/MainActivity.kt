@@ -19,9 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.appetito.data.FoodApi
 import com.example.appetito.ui.features.auth.AuthScreen
 import com.example.appetito.ui.features.auth.signup.SignUpScreen
+import com.example.appetito.ui.navigation.AuthScreen
+import com.example.appetito.ui.navigation.Home
+import com.example.appetito.ui.navigation.Login
+import com.example.appetito.ui.navigation.SignUp
 import com.example.appetito.ui.theme.AppetitoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -95,8 +102,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppetitoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding)){
-                        SignUpScreen()
+                    val navController = rememberNavController()
+
+                    NavHost(navController = navController, startDestination = AuthScreen, modifier = Modifier.padding(innerPadding)){
+
+                        composable<SignUp>() {
+                            SignUpScreen(navController)
+                        }
+
+                        composable<AuthScreen>() {
+                            AuthScreen(navController)
+                        }
+
+                        composable<Login>() {
+                            Greeting("Android")
+                        }
+
+                        composable<Home>() {
+                            Greeting("Home")
+                        }
+
                     }
                 }
             }
