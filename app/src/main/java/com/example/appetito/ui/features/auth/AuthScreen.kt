@@ -32,12 +32,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.appetito.R
 import com.example.appetito.ui.GroupSocialButtons
+import com.example.appetito.ui.navigation.Login
+import com.example.appetito.ui.navigation.SignUp
 import com.example.appetito.ui.theme.Orange
 
 @Composable
-fun AuthScreen(){
+fun AuthScreen(navController: NavController){
     val imageSize = remember {
         mutableStateOf(IntSize.Zero)
     }
@@ -137,7 +141,7 @@ fun AuthScreen(){
 
             Button(
                 onClick = {
-
+                    navController.navigate(SignUp)
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -158,7 +162,9 @@ fun AuthScreen(){
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(
-                onClick = {}
+                onClick = {
+                    navController.navigate(Login)
+                }
             ) {
                 Text(
                     text = stringResource(id = R.string.already_have_account),
@@ -176,6 +182,7 @@ fun AuthScreen(){
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AuthScreenPreview(){
-    AuthScreen()
+    val navController = rememberNavController()
+    AuthScreen(navController = navController)
 }
 
