@@ -47,23 +47,22 @@ class SignUpViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel() {
         viewModelScope.launch {
             _uiState.value = SignUpEvent.Loading
 
-            _navigationEvent.emit(SignUpNavigationEvent.NavigationToHome)
-//            try {
-//                val response = foodApi.signUp(
-//                    SignUpRequest(
-//                        name = _name.value,
-//                        email = _email.value,
-//                        password = _password.value
-//                    )
-//                )
-//                if(response.token.isNotEmpty()){
-//                    _uiState.value = SignUpEvent.Success
-//                    _navigationEvent.emit(SignUpNavigationEvent.NavigationToHome)
-//                }
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                _uiState.value = SignUpEvent.Error
-//            }
+            try {
+                val response = foodApi.signUp(
+                    SignUpRequest(
+                        name = _name.value,
+                        email = _email.value,
+                        password = _password.value
+                    )
+                )
+                if(response.token.isNotEmpty()){
+                    _uiState.value = SignUpEvent.Success
+                    _navigationEvent.emit(SignUpNavigationEvent.NavigationToHome)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _uiState.value = SignUpEvent.Error
+            }
         }
     }
 

@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appetito.data.FoodApi
 import com.example.appetito.ui.features.auth.AuthScreen
+import com.example.appetito.ui.features.auth.login.SignInScreen
 import com.example.appetito.ui.features.auth.signup.SignUpScreen
 import com.example.appetito.ui.navigation.AuthScreen
 import com.example.appetito.ui.navigation.Home
@@ -115,7 +116,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable<Login>() {
-                            Greeting("Android")
+                            SignInScreen(navController)
                         }
 
                         composable<Home>() {
