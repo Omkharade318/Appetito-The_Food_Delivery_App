@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -240,9 +241,12 @@ fun SignInScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            val context = LocalContext.current
             GroupSocialButtons(
                 onFacebookClick = { },
-                onGoogleClick = { },
+                onGoogleClick = {
+                    viewModel.onGoogleSignInClicked(context)
+                },
                 color = Color.Gray
             )
 

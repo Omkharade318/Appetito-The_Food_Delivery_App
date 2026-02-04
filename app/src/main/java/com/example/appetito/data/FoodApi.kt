@@ -1,6 +1,7 @@
 package com.example.appetito.data
 
 import com.example.appetito.data.models.AuthResponse
+import com.example.appetito.data.models.OAuthRequest
 import com.example.appetito.data.models.SignInRequest
 import com.example.appetito.data.models.SignUpRequest
 import retrofit2.http.Body
@@ -26,8 +27,10 @@ interface FoodApi {
         @Body request: SignInRequest
     ): AuthResponse
 
-    // response
+    @POST("/auth/oauth")
+    suspend fun oAuth(
+        @Body request: OAuthRequest
+    ): AuthResponse
 
-    // endpoint
 }
 

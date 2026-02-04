@@ -51,6 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.appetito.R
 import com.example.appetito.ui.FoodHubTextField
 import com.example.appetito.ui.GroupSocialButtons
+import com.example.appetito.ui.features.auth.login.SignInViewModel
 import com.example.appetito.ui.navigation.AuthScreen
 import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
@@ -60,7 +61,8 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    viewModel: SignUpViewModel = hiltViewModel()
+    viewModel: SignUpViewModel = hiltViewModel(),
+    viewModel2: SignInViewModel = hiltViewModel()
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -256,9 +258,12 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            val context = LocalContext.current
             GroupSocialButtons(
                 onFacebookClick = { },
-                onGoogleClick = { },
+                onGoogleClick = {
+                    viewModel2.onGoogleSignInClicked(context)
+                },
                 color = Color.Gray
             )
 

@@ -1,8 +1,13 @@
 package com.example.appetito.ui.features.auth.login
 
+import android.content.Context
+import android.util.Log
+import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
+import com.example.appetito.data.auth.GoogleAuthUIProvider
+import com.example.appetito.data.models.OAuthRequest
 import com.example.appetito.data.models.SignInRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel() {
 
+    val googleAuthUIProvider = GoogleAuthUIProvider()
     private val _uiState = MutableStateFlow<SignInEvent>(SignInEvent.Nothing)
     val uiState = _uiState.asStateFlow()
 
@@ -35,6 +41,36 @@ class SignInViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel() {
         _password.value = password
     }
 
+    fun onGoogleSignInClicked(context: Context){
+        viewModelScope.launch {
+            _uiState.value = SignInEvent.Loading
+            val response = googleAuthUIProvider.signIn(
+                activityContext = context,
+                credentialManager = CredentialManager.create(context)
+            )
+
+            if (response != null){
+
+                val request = OAuthRequest(
+                    token = response.token,
+                    provider = "google"
+                )
+
+                val res = foodApi.oAuth(request)
+
+                if(res.token.isNotEmpty()){
+                    Log.d("SignInViewModel", "Token: ${res.token}")
+                    _uiState.value = SignInEvent.Success
+                    _navigationEvent.emit(SignInNavigationEvent.NavigationToHome)
+                } else {
+                    _uiState.value = SignInEvent.Error
+                }
+
+            } else {
+                _uiState.value = SignInEvent.Error
+            }
+        }
+    }
 
     fun onSignInClick(){
         viewModelScope.launch {
