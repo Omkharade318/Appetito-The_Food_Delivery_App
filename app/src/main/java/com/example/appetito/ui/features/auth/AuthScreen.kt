@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,16 +33,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appetito.R
 import com.example.appetito.ui.GroupSocialButtons
+import com.example.appetito.ui.features.auth.login.SignInViewModel
 import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.navigation.SignUp
 import com.example.appetito.ui.theme.Orange
 
 @Composable
-fun AuthScreen(navController: NavController){
+fun AuthScreen(navController: NavController, viewModel: SignInViewModel = hiltViewModel()){
     val imageSize = remember {
         mutableStateOf(IntSize.Zero)
     }
@@ -131,10 +134,13 @@ fun AuthScreen(navController: NavController){
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            val context = LocalContext.current
             GroupSocialButtons(
                 onFacebookClick = { },
-                onGoogleClick = { },
-                color = Color.White
+                onGoogleClick = {
+                    viewModel.onGoogleSignInClicked(context)
+                },
+                color = Color.Gray
             )
 
             Spacer(modifier = Modifier.height(16.dp))

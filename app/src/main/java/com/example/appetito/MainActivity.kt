@@ -8,6 +8,10 @@ import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appetito.data.FoodApi
 import com.example.appetito.ui.features.auth.AuthScreen
+import com.example.appetito.ui.features.auth.login.SignInScreen
 import com.example.appetito.ui.features.auth.signup.SignUpScreen
 import com.example.appetito.ui.navigation.AuthScreen
 import com.example.appetito.ui.navigation.Home
@@ -104,7 +109,39 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = AuthScreen, modifier = Modifier.padding(innerPadding)){
+                    NavHost(
+                        navController = navController,
+                        startDestination = AuthScreen,
+                        modifier = Modifier.padding(innerPadding),
+
+                        enterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                                animationSpec = tween(300),
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+
+                        exitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                                animationSpec = tween(300),
+                            ) + fadeOut(animationSpec = tween(300))
+                        },
+
+                        popEnterTransition = {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                                animationSpec = tween(300),
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+
+                        popExitTransition = {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                                animationSpec = tween(300),
+                            ) + fadeOut(animationSpec = tween(300))
+                        }
+                    ){
 
                         composable<SignUp>() {
                             SignUpScreen(navController)
@@ -114,8 +151,36 @@ class MainActivity : ComponentActivity() {
                             AuthScreen(navController)
                         }
 
-                        composable<Login>() {
-                            Greeting("Android")
+                        composable<Login>(
+//                            enterTransition = {
+//                                slideIntoContainer(
+//                                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
+//                                    animationSpec = tween(300),
+//                                ) + fadeIn(animationSpec = tween(300))
+//                            },
+//
+//                            exitTransition = {
+//                                slideOutOfContainer(
+//                                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
+//                                    animationSpec = tween(300),
+//                                ) + fadeOut(animationSpec = tween(300))
+//                            },
+//
+//                            popEnterTransition = {
+//                                slideIntoContainer(
+//                                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+//                                    animationSpec = tween(300),
+//                                ) + fadeIn(animationSpec = tween(300))
+//                            },
+//
+//                            popExitTransition = {
+//                                slideOutOfContainer(
+//                                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+//                                    animationSpec = tween(300),
+//                                ) + fadeOut(animationSpec = tween(300))
+//                            }
+                        ) {
+                            SignInScreen(navController)
                         }
 
                         composable<Home>() {
