@@ -83,10 +83,17 @@ dependencies {
     // Splash Screen
     implementation(libs.core.splashscreen)
 
-    //google auth
+    // Google auth
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    // Facebook auth
+    implementation("com.facebook.android:facebook-login:17.0.0")
+
+    // Coil - Image url
+    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
 
     //sdp and ssp
     implementation(libs.sdp.compose)
