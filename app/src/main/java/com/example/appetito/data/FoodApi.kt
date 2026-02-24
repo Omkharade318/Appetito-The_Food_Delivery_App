@@ -1,18 +1,30 @@
 package com.example.appetito.data
 
 import com.example.appetito.data.models.AuthResponse
+import com.example.appetito.data.models.CategoriesResponse
+import com.example.appetito.data.models.FoodItemResponse
 import com.example.appetito.data.models.OAuthRequest
+import com.example.appetito.data.models.RestaurantsResponse
 import com.example.appetito.data.models.SignInRequest
 import com.example.appetito.data.models.SignUpRequest
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface FoodApi {
-    @GET("/food") // /food is the endpoint of the API we are trying to access
-    suspend fun getFood(): List<String>
 
+    @GET("/categories") // /food is the endpoint of the API we are trying to access
+    suspend fun getCategories(): Response<CategoriesResponse>
+
+    @GET("/restaurants")
+    suspend fun getRestaurants(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double
+    ): Response<RestaurantsResponse>
 
     // ✅ Signup
     @POST("/auth/signup")
@@ -31,6 +43,11 @@ interface FoodApi {
     suspend fun oAuth(
         @Body request: OAuthRequest
     ): AuthResponse
+
+    @GET("restaurants/{restaurantId}/menu")
+    suspend fun getFoodItemForRestaurant(
+        @Path("restaurantId") restaurantId: String
+    ): Response<FoodItemResponse>
 
 }
 

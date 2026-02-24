@@ -3,6 +3,7 @@ package com.example.appetito.ui.features.auth.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
+import com.example.appetito.data.FoodHubSession
 import com.example.appetito.data.models.SignUpRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SignUpViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel() {
+class SignUpViewModel @Inject constructor(val foodApi: FoodApi, val session: FoodHubSession) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SignUpEvent>(SignUpEvent.Nothing)
     val uiState = _uiState.asStateFlow()
@@ -57,6 +58,8 @@ class SignUpViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel() {
                 )
                 if(response.token.isNotEmpty()){
                     _uiState.value = SignUpEvent.Success
+                    session.storeToken(response.token)
+                    delay(1000)
                     _navigationEvent.emit(SignUpNavigationEvent.NavigationToHome)
                 }
             } catch (e: Exception) {
