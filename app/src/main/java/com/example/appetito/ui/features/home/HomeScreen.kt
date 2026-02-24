@@ -1,5 +1,8 @@
 package com.example.appetito.ui.features.home
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +25,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,9 +47,29 @@ import com.example.appetito.data.models.Restaurant
 import com.example.appetito.ui.theme.Orange
 import com.example.appetito.ui.theme.Typography
 import com.example.appetito.R
+import com.example.appetito.ui.navigation.RestaurantDetails
+import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
+fun SharedTransitionScope.HomeScreen(
+    navController: NavController,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    viewModel: HomeViewModel = hiltViewModel()) {
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collectLatest {
+            when(it){
+                is HomeViewModel.HomeScreenNavigationEvents.NavigateToDetail -> {
+                    navController.navigate(RestaurantDetails(it.id, it.name, it.imageUrl))
+                }
+
+                else -> {
+
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -61,15 +85,25 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 val categories = viewModel.categories
                 CategoriesList(categories = categories, onCategorySelected = {})
 
-                RestaurantList(restaurants = viewModel.restaurants, onRestaurantSelected = {})
+                RestaurantList(
+                    restaurants = viewModel.restaurants,
+                    animatedVisibilityScope,
+                    onRestaurantSelected = {
+                        viewModel.onRestaurantSelected(it)
+                })
             }
 
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RestaurantList(restaurants: List<Restaurant>, onRestaurantSelected: (Restaurant) -> Unit){
+fun SharedTransitionScope.RestaurantList(
+    restaurants: List<Restaurant>,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onRestaurantSelected: (Restaurant) -> Unit
+){
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -88,14 +122,18 @@ fun RestaurantList(restaurants: List<Restaurant>, onRestaurantSelected: (Restaur
 
     LazyRow {
         items(restaurants){
-            RestaurantItem(it, onRestaurantSelected)
+            RestaurantItem(it, animatedVisibilityScope = animatedVisibilityScope, onRestaurantSelected)
         }
     }
 
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RestaurantItem(restaurant: Restaurant, onRestaurantSelected: (Restaurant) -> Unit){
+fun SharedTransitionScope.RestaurantItem(
+    restaurant: Restaurant,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onRestaurantSelected: (Restaurant) -> Unit){
 
     Box(
         modifier = Modifier
@@ -104,6 +142,9 @@ fun RestaurantItem(restaurant: Restaurant, onRestaurantSelected: (Restaurant) ->
             .height(229.dp)
             .shadow(16.dp, shape = RoundedCornerShape(16.dp))
             .background(Color.White)
+            .clickable{
+                onRestaurantSelected(restaurant)
+            }
             .clip(RoundedCornerShape(16.dp))
     ){
 
@@ -115,7 +156,11 @@ fun RestaurantItem(restaurant: Restaurant, onRestaurantSelected: (Restaurant) ->
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
-                    .weight(1f),
+                    .weight(1f)
+                    .sharedElement(
+                        state = rememberSharedContentState(key = "image/${restaurant.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
                 contentScale = ContentScale.Crop
             )
 
@@ -128,7 +173,12 @@ fun RestaurantItem(restaurant: Restaurant, onRestaurantSelected: (Restaurant) ->
                 Text(
                     text = restaurant.name,
                     style = Typography.titleMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .sharedElement(
+                            state = rememberSharedContentState(key = "title/${restaurant.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
                 )
 
                 Row() {

@@ -2,6 +2,7 @@ package com.example.appetito.data
 
 import com.example.appetito.data.models.AuthResponse
 import com.example.appetito.data.models.CategoriesResponse
+import com.example.appetito.data.models.FoodItemResponse
 import com.example.appetito.data.models.OAuthRequest
 import com.example.appetito.data.models.RestaurantsResponse
 import com.example.appetito.data.models.SignInRequest
@@ -11,6 +12,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface FoodApi {
@@ -41,6 +43,11 @@ interface FoodApi {
     suspend fun oAuth(
         @Body request: OAuthRequest
     ): AuthResponse
+
+    @GET("restaurants/{restaurantId}/menu")
+    suspend fun getFoodItemForRestaurant(
+        @Path("restaurantId") restaurantId: String
+    ): Response<FoodItemResponse>
 
 }
 
