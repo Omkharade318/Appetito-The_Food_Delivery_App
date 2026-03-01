@@ -31,16 +31,20 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.appetito.data.FoodApi
 import com.example.appetito.data.FoodHubSession
+import com.example.appetito.data.models.FoodItem
 import com.example.appetito.ui.features.auth.AuthScreen
 import com.example.appetito.ui.features.auth.login.SignInScreen
 import com.example.appetito.ui.features.auth.signup.SignUpScreen
+import com.example.appetito.ui.features.food_item_details.FoodDetailsScreen
 import com.example.appetito.ui.features.home.HomeScreen
 import com.example.appetito.ui.features.restaurant_details.RestaurantDetailsScreen
 import com.example.appetito.ui.navigation.AuthScreen
+import com.example.appetito.ui.navigation.FoodDetails
 import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.navigation.RestaurantDetails
 import com.example.appetito.ui.navigation.SignUp
+import com.example.appetito.ui.navigation.foodItemNavType
 import com.example.appetito.ui.theme.AppetitoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +52,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.reflect.typeOf
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -179,6 +184,18 @@ class MainActivity : ComponentActivity() {
                                     name = route.restaurantName,
                                     imageUrl = route.restaurantImageUrl,
                                     restaurantId = route.restaurantId,
+                                    this
+                                )
+                            }
+
+                            composable<FoodDetails>(
+                                typeMap = mapOf(typeOf<FoodItem>() to foodItemNavType)
+                            ) {
+                                val route = it.toRoute<FoodDetails>()
+
+                                FoodDetailsScreen(
+                                    navController = navController,
+                                    foodItem = route.foodItems,
                                     this
                                 )
                             }
