@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+
+  <!-- Filled Circle -->
+  <path
+      android:pathData="M20,2
+                          A18,18 0,1 1,20,38
+                          A18,18 0,1 1,20,2"
+      android:fillColor="#FE724C"/>
+
+  <!-- Vertical line -->
+  <path
+      android:pathData="M20,12 L20,28"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="3"
+      android:strokeLineCap="round"
+      android:fillColor="#00000000"/>
+
+  <!-- Horizontal line -->
+  <path
+      android:pathData="M12,20 L28,20"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="3"
+      android:strokeLineCap="round"
+      android:fillColor="#00000000"/>
+
+</vector>
