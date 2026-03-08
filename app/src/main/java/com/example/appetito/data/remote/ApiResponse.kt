@@ -17,9 +17,20 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): ApiResponse<T> 
     return try {
         val res = apiCall.invoke()
         if (res.isSuccessful) {
-            ApiResponse.Success(res.body()!!)
+            val body = res.body()
+            if (body != null) {
+                ApiResponse.Success(body)
+            } else {
+                ApiResponse.Error(res.code(), "Empty response body")
+            }
         } else {
-            ApiResponse.Error(res.code(), res.errorBody()?.string() ?: "Unknown Error")
+            val errorMsg = try {
+                val json = org.json.JSONObject(res.errorBody()?.string() ?: "")
+                json.optString("error", "Unknown error (${res.code()})")
+            } catch (e: Exception) {
+                "Unknown error (${res.code()})"
+            }
+            ApiResponse.Error(res.code(), errorMsg)
         }
     } catch (e: Exception) {
         ApiResponse.Exception(e)

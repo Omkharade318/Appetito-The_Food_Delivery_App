@@ -25,3 +25,6 @@ data class RestaurantDetails(
 @Serializable
 data class FoodDetails(val foodItems: FoodItem)
 
+@Serializable
+object Cart
+
