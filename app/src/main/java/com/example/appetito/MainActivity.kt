@@ -35,10 +35,12 @@ import com.example.appetito.data.models.FoodItem
 import com.example.appetito.ui.features.auth.AuthScreen
 import com.example.appetito.ui.features.auth.login.SignInScreen
 import com.example.appetito.ui.features.auth.signup.SignUpScreen
+import com.example.appetito.ui.features.cart.CartScreen
 import com.example.appetito.ui.features.food_item_details.FoodDetailsScreen
 import com.example.appetito.ui.features.home.HomeScreen
 import com.example.appetito.ui.features.restaurant_details.RestaurantDetailsScreen
 import com.example.appetito.ui.navigation.AuthScreen
+import com.example.appetito.ui.navigation.Cart
 import com.example.appetito.ui.navigation.FoodDetails
 import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
@@ -198,6 +200,10 @@ class MainActivity : ComponentActivity() {
                                     foodItem = route.foodItems,
                                     this
                                 )
+                            }
+
+                            composable<Cart>() {
+                                CartScreen(navController)
                             }
 
                         }
