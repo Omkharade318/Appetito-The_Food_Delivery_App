@@ -1,7 +1,10 @@
 package com.example.appetito.ui.features.cart
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,28 +34,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.appetito.R
+import com.example.appetito.data.models.Address
 import com.example.appetito.data.models.CartItem
 import com.example.appetito.data.models.CheckOutDetails
 import com.example.appetito.ui.features.food_item_details.BasicDialog
 import com.example.appetito.ui.features.food_item_details.FoodItemCounter
+import com.example.appetito.ui.navigation.AddressList
 import com.example.appetito.utils.StringUtils
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(navController: NavController, viewModel: CartViewModel = hiltViewModel()){
+fun CartScreen(navController: NavController, viewModel: CartViewModel){
 
     val uiState = viewModel.uiState.collectAsState()
 
     val showErrorDialog = remember { mutableStateOf(false) }
+
+    val address = navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<Address?>("address", null)?.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key1 = address?.value) {
+        address?.value?.let {
+            viewModel.onAddressSelected(it)
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.event.collectLatest {
@@ -62,7 +77,9 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel = hiltView
                 is CartViewModel.CartEvent.showErrorDialog -> {
                     showErrorDialog.value = true
                 }
-
+                is CartViewModel.CartEvent.onAddressClicked -> {
+                    navController.navigate(AddressList)
+                }
                 else ->{
 
                 }
@@ -94,26 +111,46 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel = hiltView
             is CartViewModel.CartUiState.Success -> {
                 val data = (uiState.value as CartViewModel.CartUiState.Success).data
 
-                LazyColumn {
-                   items(data.items){ it ->
-                       CartItemView(
-                           cartItem = it,
-                           onIncrement = {
-                               cartItem,  _ ->
-                               viewModel.incrementQuantity(cartItem)
-                           },
-                           onDecrement = {
-                               cartItem, _ ->
-                               viewModel.decrementQuantity(cartItem)
-                           },
-                           onRemove = {
-                               viewModel.removeItem(it)
-                           }
-                       )
-                   }
+                if(data.items.isNotEmpty()){
+                    LazyColumn {
+                        items(data.items){ it ->
+                            CartItemView(
+                                cartItem = it,
+                                onIncrement = {
+                                        cartItem,  _ ->
+                                    viewModel.incrementQuantity(cartItem)
+                                },
+                                onDecrement = {
+                                        cartItem, _ ->
+                                    viewModel.decrementQuantity(cartItem)
+                                },
+                                onRemove = {
+                                    viewModel.removeItem(it)
+                                }
+                            )
+                        }
 
-                    item {
-                        CheckoutDetailsView(checkoutDetails = data.checkoutDetails)
+                        item {
+                            CheckoutDetailsView(checkoutDetails = data.checkoutDetails)
+                        }
+                    }
+                }
+                else{
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_cart2),
+                            contentDescription = null,
+                            tint = Color.Gray
+                        )
+                        Text(
+                            text = "No items in Cart",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
                     }
                 }
             }
@@ -135,10 +172,20 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel = hiltView
             CartViewModel.CartUiState.Nothing -> {}
         }
 
+        val selectedAddress = viewModel.selectedAddress.collectAsStateWithLifecycle()
         Spacer(modifier = Modifier.weight(1f))
 
         if(uiState.value is CartViewModel.CartUiState.Success){
-            Button(onClick = {viewModel.checkout()}, modifier = Modifier.fillMaxWidth()) {
+            AddressCard(
+                selectedAddress.value
+            ) {
+                viewModel.onAddressClicked()
+            }
+            Button(
+                onClick = {viewModel.checkout()},
+                modifier = Modifier.fillMaxWidth(),
+                enabled = selectedAddress.value != null
+            ) {
                 Text(text = "Checkout")
             }
         }
@@ -150,6 +197,35 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel = hiltView
         }
     }
 
+}
+
+@Composable
+fun AddressCard(address: Address?, onAddressClicked: () -> Unit){
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .shadow(8.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White)
+            .clickable {onAddressClicked.invoke()}
+            .padding(16.dp)
+    ) {
+        if(address != null){
+            Column {
+                Text(text = address.addressLine1, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = "${address.city}, ${address.state} ${address.country}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+        }
+        else{
+            Text(text = "Select Address", style = MaterialTheme.typography.titleMedium)
+        }
+    }
 }
 
 @Composable

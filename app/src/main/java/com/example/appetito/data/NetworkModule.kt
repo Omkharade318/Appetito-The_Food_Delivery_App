@@ -1,6 +1,8 @@
 package com.example.appetito.data
 
 import android.content.Context
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +21,10 @@ object NetworkModule {
     fun provideClient(session: FoodHubSession) : OkHttpClient {
         val client = OkHttpClient.Builder()
         client.addInterceptor { chain ->
+
+            val token = session.getToken()
+            android.util.Log.d("TOKEN_DEBUG", "Token = $token")
+
             val request = chain.request().newBuilder()
                 .addHeader("Authorization", "Bearer ${session.getToken()}")
                 .build()
@@ -48,6 +54,11 @@ object NetworkModule {
     @Provides
     fun provideSession(@ApplicationContext context: Context): FoodHubSession {
         return FoodHubSession(context)
+    }
+
+    @Provides
+    fun provideLocationService(@ApplicationContext context: Context): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
     }
 
 }

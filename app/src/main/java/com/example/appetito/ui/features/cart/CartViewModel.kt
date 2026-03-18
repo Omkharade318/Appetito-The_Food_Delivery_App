@@ -3,6 +3,7 @@ package com.example.appetito.ui.features.cart
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
+import com.example.appetito.data.models.Address
 import com.example.appetito.data.models.CartItem
 import com.example.appetito.data.models.CartResponse
 import com.example.appetito.data.models.UpdateCartItemRequest
@@ -12,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,8 +28,15 @@ class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
 
     private var cartResponse: CartResponse? = null
 
+    private val _cartItemCount = MutableStateFlow(0)
+    val cartItemCount = _cartItemCount.asStateFlow()
+
     var errorTitle: String = ""
     var errorMessage: String = ""
+
+    private val _address = MutableStateFlow<Address?>(null)
+    val selectedAddress = _address.asStateFlow()
+
 
     init {
         getCart()
@@ -41,6 +50,7 @@ class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
             when(res){
                 is ApiResponse.Success -> {
                     cartResponse = res.data
+                    _cartItemCount.value = res.data.items.size
                     _uiState.value = CartUiState.Success(res.data)
                 }
 
@@ -122,6 +132,17 @@ class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
 
     }
 
+    fun onAddressClicked(){
+        viewModelScope.launch {
+            _event.emit(CartEvent.onAddressClicked)
+        }
+    }
+
+    fun onAddressSelected(it: Address){
+        _address.value = it
+    }
+
+
     sealed class CartUiState{
         object Nothing: CartUiState()
         object Loading: CartUiState()
@@ -134,5 +155,6 @@ class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
         object OnCheckout: CartEvent()
         object onQuantityUpdateError: CartEvent()
         object onItemRemoveError: CartEvent()
+        object onAddressClicked: CartEvent()
     }
 }

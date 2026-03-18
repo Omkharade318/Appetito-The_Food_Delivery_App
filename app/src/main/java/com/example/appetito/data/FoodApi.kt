@@ -2,6 +2,8 @@ package com.example.appetito.data
 
 import com.example.appetito.data.models.AddToCartRequest
 import com.example.appetito.data.models.AddToCartResponse
+import com.example.appetito.data.models.Address
+import com.example.appetito.data.models.AddressListResponse
 import com.example.appetito.data.models.AuthResponse
 import com.example.appetito.data.models.CartResponse
 import com.example.appetito.data.models.CategoriesResponse
@@ -9,6 +11,7 @@ import com.example.appetito.data.models.FoodItemResponse
 import com.example.appetito.data.models.GenericMsgResponse
 import com.example.appetito.data.models.OAuthRequest
 import com.example.appetito.data.models.RestaurantsResponse
+import com.example.appetito.data.models.ReverseGeoCodeRequest
 import com.example.appetito.data.models.SignInRequest
 import com.example.appetito.data.models.SignUpRequest
 import com.example.appetito.data.models.UpdateCartItemRequest
@@ -67,5 +70,14 @@ interface FoodApi {
 
     @DELETE("/cart/{cartItemId}")
     suspend fun deleteCartItem(@Path("cartItemId") cartItemId: String): Response<GenericMsgResponse>
+
+    @GET("addresses")
+    suspend fun getUserAddress(): Response<AddressListResponse>
+
+    @POST("addresses/reverse-geocode")
+    suspend fun reverseGeocode(@Body request: ReverseGeoCodeRequest): Response<Address>
+
+    @POST("addresses")
+    suspend fun storeAddress(@Body address: Address): Response<GenericMsgResponse>
 }
 
