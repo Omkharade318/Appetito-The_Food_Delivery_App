@@ -61,6 +61,7 @@ import com.example.appetito.ui.features.cart.CartScreen
 import com.example.appetito.ui.features.cart.CartViewModel
 import com.example.appetito.ui.features.food_item_details.FoodDetailsScreen
 import com.example.appetito.ui.features.home.HomeScreen
+import com.example.appetito.ui.features.order_success.OrderSuccess
 import com.example.appetito.ui.features.restaurant_details.RestaurantDetailsScreen
 import com.example.appetito.ui.navigation.AddAddress
 import com.example.appetito.ui.navigation.AddressList
@@ -71,6 +72,7 @@ import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.navigation.NavRoutes
 import com.example.appetito.ui.navigation.Notification
+import com.example.appetito.ui.navigation.OrderSuccess
 import com.example.appetito.ui.navigation.RestaurantDetails
 import com.example.appetito.ui.navigation.SignUp
 import com.example.appetito.ui.navigation.foodItemNavType
@@ -333,6 +335,12 @@ class MainActivity : ComponentActivity() {
                             composable<AddAddress>{
                                 shouldShowBottomNav.value = false
                                 AddAddressScreen(navController)
+                            }
+
+                            composable<OrderSuccess> {
+                                shouldShowBottomNav.value = false
+                                val orderID = it.toRoute<OrderSuccess>().orderId
+                                OrderSuccess(orderID, navController)
                             }
 
                         }

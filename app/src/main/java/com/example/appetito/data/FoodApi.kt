@@ -7,9 +7,13 @@ import com.example.appetito.data.models.AddressListResponse
 import com.example.appetito.data.models.AuthResponse
 import com.example.appetito.data.models.CartResponse
 import com.example.appetito.data.models.CategoriesResponse
+import com.example.appetito.data.models.ConfirmPaymentRequest
+import com.example.appetito.data.models.ConfirmPaymentResponse
 import com.example.appetito.data.models.FoodItemResponse
 import com.example.appetito.data.models.GenericMsgResponse
 import com.example.appetito.data.models.OAuthRequest
+import com.example.appetito.data.models.PaymentIntentRequest
+import com.example.appetito.data.models.PaymentIntentResponse
 import com.example.appetito.data.models.RestaurantsResponse
 import com.example.appetito.data.models.ReverseGeoCodeRequest
 import com.example.appetito.data.models.SignInRequest
@@ -79,5 +83,13 @@ interface FoodApi {
 
     @POST("addresses")
     suspend fun storeAddress(@Body address: Address): Response<GenericMsgResponse>
+
+    @POST("/payments/create-intent")
+    suspend fun getPaymentIntent(@Body request: PaymentIntentRequest): Response<PaymentIntentResponse>
+
+    @POST("/payments/confirm/{paymentIntentId}")
+    suspend fun verifyPurchase(
+        @Body request: ConfirmPaymentRequest, @Path("paymentIntentId") paymentIntentId: String
+    ): Response<ConfirmPaymentResponse>
 }
 

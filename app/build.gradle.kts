@@ -101,6 +101,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
+    // stripe
+    implementation("com.stripe:stripe-android:20.53.0")
+
     //sdp and ssp
     implementation(libs.sdp.compose)
 }
