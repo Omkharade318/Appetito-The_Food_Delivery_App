@@ -41,10 +41,14 @@ import com.example.appetito.ui.GroupSocialButtons
 import com.example.appetito.ui.features.auth.login.SignInViewModel
 import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.navigation.SignUp
-import com.example.appetito.ui.theme.Orange
+import com.example.appetito.ui.theme.Primary
 
 @Composable
-fun AuthScreen(navController: NavController, viewModel: SignInViewModel = hiltViewModel()){
+fun AuthScreen(
+    navController: NavController,
+    isCustomer: Boolean = true,
+    viewModel: SignInViewModel = hiltViewModel()
+){
     val imageSize = remember {
         mutableStateOf(IntSize.Zero)
     }
@@ -90,7 +94,7 @@ fun AuthScreen(navController: NavController, viewModel: SignInViewModel = hiltVi
         ) {
             Text(
                 text = stringResource(id = R.string.skip),
-                color = Orange
+                color = Primary
             )
         }
 
@@ -110,7 +114,7 @@ fun AuthScreen(navController: NavController, viewModel: SignInViewModel = hiltVi
 
             Text(
                 text = stringResource(id = R.string.app_name),
-                color = Orange,
+                color = Primary,
                 modifier = Modifier,
                 fontSize = 50.sp,
                 fontWeight = FontWeight.Bold
@@ -133,51 +137,52 @@ fun AuthScreen(navController: NavController, viewModel: SignInViewModel = hiltVi
                 .padding(bottom = 30.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            val context = LocalContext.current
-            GroupSocialButtons(
-                onFacebookClick = { },
-                onGoogleClick = {
-                    viewModel.onGoogleSignInClicked(context)
-                },
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    navController.navigate(SignUp)
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray.copy(alpha = 0.2f)
-                ),
-                shape = RoundedCornerShape(32.dp),
-                border = BorderStroke(1.dp, Color.White)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.sign_with_email),
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 12.dp),
-                    fontSize = 18.sp
+            if (isCustomer) {
+                val context = LocalContext.current
+                GroupSocialButtons(
+                    onFacebookClick = { },
+                    onGoogleClick = {
+                        viewModel.onGoogleSignInClicked(context)
+                    },
+                    color = Color.Gray
                 )
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(
-                onClick = {
-                    navController.navigate(Login)
+                Button(
+                    onClick = {
+                        navController.navigate(SignUp)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Gray.copy(alpha = 0.2f)
+                    ),
+                    shape = RoundedCornerShape(32.dp),
+                    border = BorderStroke(1.dp, Color.White)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.sign_with_email),
+                        color = Color.White,
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        fontSize = 18.sp
+                    )
                 }
-            ) {
-                Text(
-                    text = stringResource(id = R.string.already_have_account),
-                    color = Color.White,
-                    fontSize = 16.sp
-                )
             }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TextButton(
+                    onClick = {
+                        navController.navigate(Login)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.already_have_account),
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+
 
         }
 

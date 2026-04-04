@@ -42,4 +42,20 @@ object AddAddress: NavRoutes
 @Serializable
 data class OrderSuccess(val orderId: String): NavRoutes
 
+@Serializable
+data class OrderDetails(val orderId: String) : NavRoutes
+
+@Serializable
+object OrderList : NavRoutes
+
+@Serializable
+object MenuList : NavRoutes
+
+@Serializable
+object AddMenu : NavRoutes
+
+@Serializable
+object ImagePicker : NavRoutes
+
+
 

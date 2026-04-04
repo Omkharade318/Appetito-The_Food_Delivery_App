@@ -1,6 +1,7 @@
 package com.example.appetito.data
 
 import android.content.Context
+import com.example.appetito.location.LocationManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.Module
@@ -18,31 +19,27 @@ import retrofit2.converter.gson.GsonConverterFactory
 object NetworkModule {
 
     @Provides
-    fun provideClient(session: FoodHubSession) : OkHttpClient {
+    fun provideClient(session: FoodHubSession, @ApplicationContext context: Context): OkHttpClient {
         val client = OkHttpClient.Builder()
         client.addInterceptor { chain ->
-
-            val token = session.getToken()
-            android.util.Log.d("TOKEN_DEBUG", "Token = $token")
-
             val request = chain.request().newBuilder()
                 .addHeader("Authorization", "Bearer ${session.getToken()}")
+                .addHeader("X-Package-Name", context.packageName)
                 .build()
             chain.proceed(request)
         }
         client.addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
-
-        return  client.build()
+        return client.build()
     }
 
     @Provides
     fun provideRetrofit(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .client(client)
-            .baseUrl("http://10.0.2.2:8080/")
-            .addConverterFactory(GsonConverterFactory.create()) // helps to convert the responses into json format
+            .baseUrl("http://10.0.2.2:8080")
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
@@ -59,6 +56,19 @@ object NetworkModule {
     @Provides
     fun provideLocationService(@ApplicationContext context: Context): FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    @Provides
+    fun provideLocationManager(
+        fusedLocationProviderClient: FusedLocationProviderClient,
+        @ApplicationContext context: Context
+    ): LocationManager {
+        return LocationManager(fusedLocationProviderClient, context)
+    }
+
+    @Provides
+    fun provideSocketService(): SocketService {
+        return SocketServiceImpl()
     }
 
 }

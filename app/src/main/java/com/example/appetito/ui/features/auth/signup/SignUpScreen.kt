@@ -1,6 +1,5 @@
 package com.example.appetito.ui.features.auth.signup
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -55,7 +54,7 @@ import com.example.appetito.ui.features.auth.login.SignInViewModel
 import com.example.appetito.ui.navigation.AuthScreen
 import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
-import com.example.appetito.ui.theme.Orange
+import com.example.appetito.ui.theme.Primary
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -207,7 +206,7 @@ fun SignUpScreen(
                 onClick = viewModel::onSignUpClick,
                 modifier = Modifier
                     .height(60.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Orange)
+                colors = ButtonDefaults.buttonColors(containerColor = Primary)
             ) {
                 Box{
                     AnimatedContent(

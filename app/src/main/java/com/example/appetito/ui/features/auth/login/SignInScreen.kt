@@ -52,14 +52,14 @@ import com.example.appetito.ui.FoodHubTextField
 import com.example.appetito.ui.GroupSocialButtons
 import com.example.appetito.ui.navigation.AuthScreen
 import com.example.appetito.ui.navigation.Home
-import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.navigation.SignUp
-import com.example.appetito.ui.theme.Orange
+import com.example.appetito.ui.theme.Primary
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SignInScreen(
     navController: NavController,
+    isCustomer: Boolean = true,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -190,7 +190,7 @@ fun SignInScreen(
                 onClick = viewModel::onSignInClick,
                 modifier = Modifier
                     .height(60.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Orange)
+                colors = ButtonDefaults.buttonColors(containerColor = Primary)
             ) {
                 Box{
                     AnimatedContent(
@@ -228,28 +228,30 @@ fun SignInScreen(
 
             Spacer(modifier = Modifier.size(16.dp))
 
-            Text(
-                text = stringResource(id = R.string.dont_have_account),
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clickable {
-                        viewModel.onSignUpClicked()
-                    }
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+            if(isCustomer) {
 
-            Spacer(modifier = Modifier.padding(16.dp))
+                Text(
+                    text = stringResource(id = R.string.dont_have_account),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            viewModel.onSignUpClicked()
+                        }
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
 
-            val context = LocalContext.current
-            GroupSocialButtons(
-                onFacebookClick = { },
-                onGoogleClick = {
-                    viewModel.onGoogleSignInClicked(context)
-                },
-                color = Color.Gray
-            )
+                Spacer(modifier = Modifier.padding(16.dp))
 
+                val context = LocalContext.current
+                GroupSocialButtons(
+                    onFacebookClick = { },
+                    onGoogleClick = {
+                        viewModel.onGoogleSignInClicked(context)
+                    },
+                    color = Color.Gray
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

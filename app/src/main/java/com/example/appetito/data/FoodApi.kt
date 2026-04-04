@@ -9,23 +9,37 @@ import com.example.appetito.data.models.CartResponse
 import com.example.appetito.data.models.CategoriesResponse
 import com.example.appetito.data.models.ConfirmPaymentRequest
 import com.example.appetito.data.models.ConfirmPaymentResponse
+import com.example.appetito.data.models.DelieveriesListResponse
+import com.example.appetito.data.models.FCMRequest
+import com.example.appetito.data.models.FoodItem
+import com.example.appetito.data.models.FoodItemListResponse
 import com.example.appetito.data.models.FoodItemResponse
 import com.example.appetito.data.models.GenericMsgResponse
+import com.example.appetito.data.models.ImageUploadResponse
+import com.example.appetito.data.models.NotificationListResponse
 import com.example.appetito.data.models.OAuthRequest
+import com.example.appetito.data.models.Order
+import com.example.appetito.data.models.OrderListResponse
 import com.example.appetito.data.models.PaymentIntentRequest
 import com.example.appetito.data.models.PaymentIntentResponse
+import com.example.appetito.data.models.Restaurant
 import com.example.appetito.data.models.RestaurantsResponse
 import com.example.appetito.data.models.ReverseGeoCodeRequest
+import com.example.appetito.data.models.RiderDeliveryOrderListResponse
 import com.example.appetito.data.models.SignInRequest
 import com.example.appetito.data.models.SignUpRequest
 import com.example.appetito.data.models.UpdateCartItemRequest
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -91,5 +105,60 @@ interface FoodApi {
     suspend fun verifyPurchase(
         @Body request: ConfirmPaymentRequest, @Path("paymentIntentId") paymentIntentId: String
     ): Response<ConfirmPaymentResponse>
+
+    @GET("/orders")
+    suspend fun getOrders(): Response<OrderListResponse>
+
+    @GET("/orders/{orderId}")
+    suspend fun getOrderDetails(@Path("orderId") orderId: String): Response<Order>
+
+    @PUT("/notifications/fcm-token")
+    suspend fun updateToken(@Body request: FCMRequest): Response<GenericMsgResponse>
+
+    @POST("/notifications/{id}/read")
+    suspend fun readNotification(@Path("id") id: String): Response<GenericMsgResponse>
+
+    @GET("/notifications")
+    suspend fun getNotifications(): Response<NotificationListResponse>
+
+    // add restaurant endpoints
+    @GET("/restaurant-owner/profile")
+    suspend fun getRestaurantProfile(): Response<Restaurant>
+
+    @GET("/restaurant-owner/orders")
+    suspend fun getRestaurantOrders(@Query("status") status: String): Response<OrderListResponse>
+
+    @PATCH("orders/{orderId}/status")
+    suspend fun updateOrderStatus(
+        @Path("orderId") orderId: String,
+        @Body map: Map<String, String>
+    ): Response<GenericMsgResponse>
+
+    @GET("/restaurants/{id}/menu")
+    suspend fun getRestaurantMenu(@Path("id") restaurantId: String): Response<FoodItemListResponse>
+
+    @POST("/restaurants/{id}/menu")
+    suspend fun addRestaurantMenu(
+        @Path("id") restaurantId: String,
+        @Body foodItem: FoodItem
+    ): Response<GenericMsgResponse>
+
+    @POST("/images/upload")
+    @Multipart
+    suspend fun uploadImage(@Part image: MultipartBody.Part): Response<ImageUploadResponse>
+
+    @GET("/rider/deliveries/available")
+    suspend fun getAvailableDeliveries(): Response<DelieveriesListResponse>
+
+    @POST("/rider/deliveries/{orderId}/reject")
+    suspend fun rejectDelivery(@Path("orderId") orderId: String): Response<GenericMsgResponse>
+
+    @POST("/rider/deliveries/{orderId}/accept")
+    suspend fun acceptDelivery(@Path("orderId") orderId: String): Response<GenericMsgResponse>
+
+    @GET("/rider/deliveries/active")
+    suspend fun getActiveDeliveries(): Response<RiderDeliveryOrderListResponse>
+
+
 }
 

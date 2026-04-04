@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.compose.compiler) apply false
     id("com.google.dagger.hilt.android") version "2.57.1" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.5.21" apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
