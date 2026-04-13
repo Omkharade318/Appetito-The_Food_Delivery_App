@@ -145,7 +145,7 @@ fun OrderListScreen(navController: NavController, viewModel: OrderListViewModel 
 
                 HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
                     when (page) {
-                        0 -> {
+                        0 -> { 
                             val upcomingList = list.filter { it.status != "Delivered" } 
                             UpcomingOrdersList(upcomingList, onClick = { viewModel.navigateToDetails(it) })
                         }
