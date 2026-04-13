@@ -1,15 +1,12 @@
 package com.example.appetito
 
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.OvershootInterpolator
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -71,7 +68,7 @@ import com.example.appetito.ui.features.auth.login.SignInScreen
 import com.example.appetito.ui.features.auth.signup.SignUpScreen
 import com.example.appetito.ui.features.notifications.NotificationsList
 import com.example.appetito.ui.features.notifications.NotificationsViewModel
-import com.example.appetito.ui.features.orders.OrderListScreen
+import com.example.appetito.ui.feature.orders.OrderListScreen
 import com.example.appetito.ui.navigation.AddAddress
 import com.example.appetito.ui.navigation.AddressList
 import com.example.appetito.ui.navigation.AuthScreen
@@ -97,8 +94,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.compareTo
-import kotlin.plus
 import kotlin.reflect.typeOf
 
 
