@@ -1,5 +1,6 @@
 package com.example.appetito.ui
 
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -52,13 +54,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import com.example.appetito.R
+import com.example.appetito.ui.features.auth.BaseAuthViewModel
 import com.example.appetito.ui.theme.Primary
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 
 @Composable
-fun GroupSocialButtons(color: Color = Color.White, onFacebookClick: () -> Unit, onGoogleClick: () -> Unit) {
+fun GroupSocialButtons(
+    color: Color = Color.White,
+    viewModel: BaseAuthViewModel
+) {
 
     Column {
         Row(
@@ -66,30 +72,45 @@ fun GroupSocialButtons(color: Color = Color.White, onFacebookClick: () -> Unit, 
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HorizontalDivider(modifier = Modifier.weight(1f).padding(start = 8.dp), thickness = 1.dp, color = color)
-            Text(text = stringResource(id = R.string.sign_in_title), color = color, modifier = Modifier.padding(horizontal = 16.dp), fontSize = 16.sp)
-            HorizontalDivider(modifier = Modifier.weight(1f).padding(end = 8.dp), thickness = 1.dp, color = color)
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp),
+                thickness = 1.dp,
+                color = color
+            )
+            Text(
+                text = stringResource(id = R.string.sign_in_with),
+                color = color,
+                modifier = Modifier.padding(8.dp)
+            )
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+                thickness = 1.dp,
+                color = color
+            )
         }
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            SocialButton(
+        val context = LocalContext.current as ComponentActivity
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            com.example.appetito.ui.SocialButton(
                 icon = R.drawable.ic_facebook,
                 title = R.string.sign_with_facebook,
-                onClick = onFacebookClick
+                onClick = { viewModel.onFacebookClicked(context) }
             )
-            SocialButton(
+            com.example.appetito.ui.SocialButton(
                 icon = R.drawable.ic_google,
                 title = R.string.sign_with_google,
-                onClick = onGoogleClick
+                onClick = { viewModel.onGoogleClicked(context) }
             )
         }
-
 
     }
 }
-
 @Composable
 fun SocialButton(
     icon: Int,

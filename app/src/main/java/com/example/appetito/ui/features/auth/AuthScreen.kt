@@ -14,11 +14,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,44 +44,71 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appetito.R
+import com.example.appetito.ui.BasicDialog
 import com.example.appetito.ui.GroupSocialButtons
 import com.example.appetito.ui.features.auth.login.SignInViewModel
+import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
 import com.example.appetito.ui.navigation.SignUp
 import com.example.appetito.ui.theme.Primary
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthScreen(
     navController: NavController,
     isCustomer: Boolean = true,
-    viewModel: SignInViewModel = hiltViewModel()
-){
+    viewModel: AuthScreenViewModel = hiltViewModel()
+) {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
     val imageSize = remember {
         mutableStateOf(IntSize.Zero)
     }
-
     val brush = Brush.verticalGradient(
         colors = listOf(
-            Color.Transparent,
-            Color.Black
+            androidx.compose.ui.graphics.Color.Transparent, androidx.compose.ui.graphics.Color.Black
         ),
         startY = imageSize.value.height.toFloat() / 3,
     )
+    LaunchedEffect(true) {
+        viewModel.navigationEvent.collectLatest { event ->
+            when (event) {
+                is AuthScreenViewModel.AuthNavigationEvent.NavigateToHome -> {
+                    navController.navigate(Home) {
+                        popUpTo(com.example.appetito.ui.navigation.AuthScreen) {
+                            inclusive = true
+                        }
+                    }
+                }
 
-    Box(modifier = Modifier.fillMaxSize(). background(Color.Black)){
-        Image(
-            painter = painterResource(
-            id = R.drawable.background),
+                is AuthScreenViewModel.AuthNavigationEvent.NavigateToSignUp -> {
+                    navController.navigate(SignUp)
+                }
+
+                is AuthScreenViewModel.AuthNavigationEvent.ShowErrorDialog -> {
+                    showDialog = true
+                }
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Image(painter = painterResource(id = R.drawable.background),
             contentDescription = null,
             modifier = Modifier
-                .onGloballyPositioned{
+                .onGloballyPositioned {
                     imageSize.value = it.size
                 }
-                .alpha(0.7f)
+                .alpha(0.6f)
                 .fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-
+            contentScale = ContentScale.FillBounds)
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -82,20 +116,15 @@ fun AuthScreen(
         )
 
         Button(
-            onClick = {
-
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White
-            ),
+            onClick = { /*TODO*/ },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(
+                    Alignment.TopEnd
+                )
                 .padding(8.dp)
         ) {
-            Text(
-                text = stringResource(id = R.string.skip),
-                color = Primary
-            )
+            Text(text = stringResource(id = R.string.skip), color = Primary)
         }
 
         Column(
@@ -109,17 +138,15 @@ fun AuthScreen(
                 color = Color.Black,
                 modifier = Modifier,
                 fontSize = 50.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
-
             Text(
                 text = stringResource(id = R.string.app_name),
                 color = Primary,
                 modifier = Modifier,
                 fontSize = 50.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
-
             Text(
                 text = stringResource(id = R.string.app_description),
                 color = Color.DarkGray,
@@ -133,67 +160,53 @@ fun AuthScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .padding(bottom = 30.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isCustomer) {
-                val context = LocalContext.current
-                GroupSocialButtons(
-                    onFacebookClick = { },
-                    onGoogleClick = {
-                        viewModel.onGoogleSignInClicked(context)
-                    },
-                    color = Color.Gray
-                )
-
+                GroupSocialButtons(viewModel = viewModel)
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Button(
                     onClick = {
                         navController.navigate(SignUp)
                     },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Gray.copy(alpha = 0.2f)
-                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray.copy(alpha = 0.2f)),
                     shape = RoundedCornerShape(32.dp),
                     border = BorderStroke(1.dp, Color.White)
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.sign_with_email),
-                        color = Color.White,
-                        modifier = Modifier.padding(vertical = 12.dp),
-                        fontSize = 18.sp
-                    )
+                    Text(text = stringResource(id = R.string.sign_with_email), color = Color.White)
                 }
             }
-                Spacer(modifier = Modifier.height(16.dp))
 
-                TextButton(
-                    onClick = {
-                        navController.navigate(Login)
-                    }
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.already_have_account),
-                        color = Color.White,
-                        fontSize = 16.sp
-                    )
-                }
-
-
+            TextButton(onClick = {
+                navController.navigate(Login)
+            }) {
+                Text(text = stringResource(id = R.string.already_have_account), color = Color.White)
+            }
         }
 
+    }
 
+    if (showDialog) {
+        ModalBottomSheet(onDismissRequest = { showDialog = false }, sheetState = sheetState) {
+            BasicDialog(
+                title = viewModel.error,
+                description = viewModel.errorDescription,
+                onClick = {
+                    scope.launch {
+                        sheetState.hide()
+                        showDialog = false
+                    }
+                }
+            )
+        }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun AuthScreenPreview(){
-    val navController = rememberNavController()
-    AuthScreen(navController = navController)
-}
 
+@Preview(showBackground = true)
+@Composable
+fun AuthScreenPreview() {
+    AuthScreen(rememberNavController())
+}

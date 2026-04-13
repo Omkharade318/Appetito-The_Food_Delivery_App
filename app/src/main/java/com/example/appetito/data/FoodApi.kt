@@ -54,23 +54,14 @@ interface FoodApi {
         @Query("lon") lon: Double
     ): Response<RestaurantsResponse>
 
-    // ✅ Signup
     @POST("/auth/signup")
-    suspend fun signUp(
-        @Body request: SignUpRequest
-    ): AuthResponse
+    suspend fun signUp(@Body request: SignUpRequest): Response<AuthResponse>
 
-    // ✅ Login
     @POST("/auth/login")
-    suspend fun signIn(
-        @Header("X-Package-Name") packageName: String,
-        @Body request: SignInRequest
-    ): AuthResponse
+    suspend fun signIn(@Body request: SignInRequest): Response<AuthResponse>
 
     @POST("/auth/oauth")
-    suspend fun oAuth(
-        @Body request: OAuthRequest
-    ): AuthResponse
+    suspend fun oAuth(@Body request: OAuthRequest): Response<AuthResponse>
 
     @GET("restaurants/{restaurantId}/menu")
     suspend fun getFoodItemForRestaurant(

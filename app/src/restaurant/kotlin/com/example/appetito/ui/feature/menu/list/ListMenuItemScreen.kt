@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.appetito.ui.common.FoodItemView
+import com.example.appetito.ui.features.common.FoodItemView
 import com.example.appetito.ui.features.notifications.ErrorScreen
 import com.example.appetito.ui.features.notifications.LoadingScreen
 import com.example.appetito.ui.navigation.AddMenu
