@@ -3,6 +3,7 @@ package com.example.appetito.ui.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
+import com.example.appetito.data.models.Ad
 import com.example.appetito.data.models.Category
 import com.example.appetito.data.models.Restaurant
 import com.example.appetito.data.remote.ApiResponse
@@ -27,11 +28,13 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
 
     var categories = emptyList<Category>()
     var restaurants = emptyList<Restaurant>()
+    var ads = emptyList<Ad>()
 
     init {
         viewModelScope.launch {
             categories = getCategories()
             restaurants = getPopularRestaurants()
+            ads = getAds()
 
             if (categories.isNotEmpty() && restaurants.isNotEmpty()) {
                 _uiState.value = HomeScreenState.Success
@@ -58,6 +61,20 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
         }
         return list
 
+    }
+
+    private suspend fun getAds(): List<Ad> {
+        var list = emptyList<Ad>()
+        val response = safeApiCall {
+            foodApi.getAds()
+        }
+        when (response) {
+            is com.example.appetito.data.remote.ApiResponse.Success -> {
+                list = response.data.data
+            }
+            else -> {}
+        }
+        return list
     }
 
     private suspend fun getPopularRestaurants(): List<Restaurant> {
@@ -89,6 +106,12 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
         }
     }
 
+    fun onAdSelected(ad: Ad) {
+        viewModelScope.launch {
+            _navigationEvent.emit(HomeScreenNavigationEvents.NavigateToAdDetail(ad))
+        }
+    }
+
     sealed class HomeScreenState {
         object Loading : HomeScreenState()
         object Empty : HomeScreenState()
@@ -98,5 +121,6 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
     sealed class HomeScreenNavigationEvents {
         data class NavigateToDetail(val name: String, val imageUrl: String, val id: String) :
             HomeScreenNavigationEvents()
+        data class NavigateToAdDetail(val ad: Ad) : HomeScreenNavigationEvents()
     }
 }

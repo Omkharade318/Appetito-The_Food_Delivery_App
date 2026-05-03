@@ -53,6 +53,7 @@ import com.example.appetito.data.FoodApi
 import com.example.appetito.data.FoodHubSession
 import com.example.appetito.ui.FoodHubNavHost
 import com.example.appetito.ui.feature.home.HomeScreen
+import com.example.appetito.ui.feature.home.CreateAdScreen
 import com.example.appetito.ui.feature.menu.add.AddMenuItemScreen
 import com.example.appetito.ui.feature.menu.list.ListMenuItemsScreen
 import com.example.appetito.ui.feature.order_list.OrderListScreen
@@ -71,6 +72,7 @@ import com.example.appetito.ui.navigation.NavRoutes
 import com.example.appetito.ui.navigation.Notification
 import com.example.appetito.ui.navigation.OrderDetails
 import com.example.appetito.ui.navigation.OrderList
+import com.example.appetito.ui.navigation.CreateAd
 import com.example.appetito.ui.navigation.SignUp
 import com.example.appetito.ui.theme.AppetitoTheme
 import com.example.appetito.ui.theme.Mustard
@@ -256,6 +258,10 @@ class MainActivity : BaseFoodHubActivity() {
                             composable<ImagePicker> {
                                 shouldShowBottomNav.value = false
                                 ImagePickerScreen(navController)
+                            }
+                            composable<CreateAd> {
+                                shouldShowBottomNav.value = false
+                                CreateAdScreen(navController)
                             }
                         }
                     }

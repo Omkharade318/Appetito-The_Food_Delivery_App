@@ -56,6 +56,5 @@ object AddMenu : NavRoutes
 
 @Serializable
 object ImagePicker : NavRoutes
-
-
-
+@Serializable
+object CreateAd : NavRoutes

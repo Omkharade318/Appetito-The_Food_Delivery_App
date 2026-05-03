@@ -78,6 +78,14 @@ fun SharedTransitionScope.HomeScreen(
                 is HomeViewModel.HomeScreenNavigationEvents.NavigateToDetail -> {
                     navController.navigate(RestaurantDetails(it.id, it.name, it.imageUrl))
                 }
+                is HomeViewModel.HomeScreenNavigationEvents.NavigateToAdDetail -> {
+                    // For now, let's just navigate to restaurant details if it's an ad for a restaurant
+                    // Or we could have a specific ad detail screen.
+                    // The user said "click on them to know more about them".
+                    // I'll just show an alert or navigate to restaurant details for now if we don't have an AdDetails screen.
+                    // Actually, I'll navigate to RestaurantDetails.
+                    navController.navigate(RestaurantDetails(it.ad.restaurantId, it.ad.restaurantName, it.ad.imageUrl))
+                }
                 else -> {}
             }
         }
@@ -90,6 +98,11 @@ fun SharedTransitionScope.HomeScreen(
             .verticalScroll(rememberScrollState())
     ) {
         HomeHeader()
+        
+        val ads = viewModel.ads
+        if (ads.isNotEmpty()) {
+            AdBanner(ads = ads, onAdClick = { viewModel.onAdSelected(it) })
+        }
 
         val uiState = viewModel.uiState.collectAsState()
         when (uiState.value) {

@@ -30,16 +30,37 @@ class HomeViewModel @Inject constructor(val foodApi: FoodApi, val session: FoodH
             val response = safeApiCall { foodApi.getRestaurantProfile() }
             when (response) {
                 is ApiResponse.Success -> {
-                    _uiState.value = HomeScreenState.Success(response.data)
                     session.storeRestaurantId(response.data.id)
+                    fetchAds(response.data)
                 }
+                is ApiResponse.Error -> _uiState.value = HomeScreenState.Failed
+                is ApiResponse.Exception -> _uiState.value = HomeScreenState.Failed
+            }
+        }
+    }
 
-                is ApiResponse.Error -> {
-                    _uiState.value = HomeScreenState.Failed
+    private fun fetchAds(restaurant: Restaurant) {
+        viewModelScope.launch {
+            val response = safeApiCall { foodApi.getAdsByRestaurant(restaurant.id) }
+            when (response) {
+                is ApiResponse.Success -> {
+                    _uiState.value = HomeScreenState.Success(restaurant, response.data.data)
                 }
+                else -> {
+                    _uiState.value = HomeScreenState.Success(restaurant, emptyList())
+                }
+            }
+        }
+    }
 
-                is ApiResponse.Exception -> {
-                    _uiState.value = HomeScreenState.Failed
+    fun deleteAd(adId: String) {
+        viewModelScope.launch {
+            val currentState = _uiState.value
+            if (currentState is HomeScreenState.Success) {
+                val response = safeApiCall { foodApi.deleteAd(adId) }
+                if (response is ApiResponse.Success) {
+                    // Refetch ads
+                    fetchAds(currentState.data)
                 }
             }
         }
@@ -52,7 +73,6 @@ class HomeViewModel @Inject constructor(val foodApi: FoodApi, val session: FoodH
     sealed class HomeScreenState {
         object Loading : HomeScreenState()
         object Failed : HomeScreenState()
-        data class Success(val data: Restaurant) : HomeScreenState()
+        data class Success(val data: Restaurant, val ads: List<com.example.appetito.data.models.Ad>) : HomeScreenState()
     }
-
 }
