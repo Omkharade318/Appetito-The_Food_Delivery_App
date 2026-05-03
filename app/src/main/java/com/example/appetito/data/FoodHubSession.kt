@@ -18,4 +18,15 @@ class FoodHubSession(val context: Context) {
         }
         return null
     }
+
+    fun storeRestaurantId(restaurantId: String) {
+        sharedPrefs.edit().putString("restaurantId", restaurantId).apply()
+    }
+
+    fun getRestaurantId(): String? {
+        sharedPrefs.getString("restaurantId", null)?.let {
+            return it
+        }
+        return null
+    }
 }

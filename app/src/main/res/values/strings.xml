@@ -14,4 +14,6 @@
     <string name="email">E-mail</string>
     <string name="full_name">Full name</string>
     <string name="sign_in">Sign In</string>
+    <string name="ok">OK</string>
+    <string name="sign_in_with">sign in with</string>
 </resources>

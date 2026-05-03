@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("kotlin-parcelize")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -33,6 +35,25 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    flavorDimensions += "environment"
+
+    productFlavors {
+         create("customer"){
+             dimension = "environment"
+         }
+        create("restaurant"){
+            dimension = "environment"
+            applicationIdSuffix = ".restaurant"
+            resValue("string", "app_name", "Appetito Restaurant")
+        }
+        create("rider"){
+            dimension = "environment"
+            applicationIdSuffix = ".rider"
+            resValue("string", "app_name", "Appetito Rider")
+
+        }
     }
 
     compileOptions {
@@ -94,6 +115,19 @@ dependencies {
     // Coil - Image url
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+
+    // Google Maps
+    implementation("com.google.maps.android:maps-compose:6.1.1")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
+
+    // stripe
+    implementation("com.stripe:stripe-android:20.53.0")
+
+    // firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     //sdp and ssp
     implementation(libs.sdp.compose)

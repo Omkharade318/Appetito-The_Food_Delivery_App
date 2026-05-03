@@ -3,28 +3,59 @@ package com.example.appetito.ui.navigation
 import com.example.appetito.data.models.FoodItem
 import kotlinx.serialization.Serializable
 
-@Serializable
-object Login
+interface NavRoutes
 
 @Serializable
-object SignUp
+object Login : NavRoutes
 
 @Serializable
-object AuthScreen
+object SignUp : NavRoutes
 
 @Serializable
-object Home
+object AuthScreen : NavRoutes
+
+@Serializable
+object Home : NavRoutes
 
 @Serializable
 data class RestaurantDetails(
     val restaurantId: String,
     val restaurantName: String,
     val restaurantImageUrl: String
-)
+) : NavRoutes
 
 @Serializable
-data class FoodDetails(val foodItems: FoodItem)
+data class FoodDetails(val foodItems: FoodItem) : NavRoutes
 
 @Serializable
-object Cart
+object Cart : NavRoutes
+
+@Serializable
+object Notification : NavRoutes
+
+@Serializable
+object AddressList: NavRoutes
+
+@Serializable
+object AddAddress: NavRoutes
+
+@Serializable
+data class OrderSuccess(val orderId: String): NavRoutes
+
+@Serializable
+data class OrderDetails(val orderId: String) : NavRoutes
+
+@Serializable
+object OrderList : NavRoutes
+
+@Serializable
+object MenuList : NavRoutes
+
+@Serializable
+object AddMenu : NavRoutes
+
+@Serializable
+object ImagePicker : NavRoutes
+
+
 
