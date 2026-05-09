@@ -67,23 +67,27 @@ class AddMenuItemViewModel @Inject constructor(
         _imageUrl.value = imageUrl
     }
 
+    private val _imageUrlString = MutableStateFlow("")
+    val imageUrlString = _imageUrlString.asStateFlow()
+
+    fun onImageUrlStringChange(newUrl: String) {
+        _imageUrlString.value = newUrl
+    }
+
     fun addMenuItem() {
         val name = name.value
         val description = description.value
         val price = price.value.toDoubleOrNull() ?: 0.0
         val restaurantId = session.getRestaurantId() ?: ""
+        val imageUrlValue = imageUrlString.value
 
-        if (name.isEmpty() || description.isEmpty() || price == 0.0 || imageUrl.value == null) {
+        if (name.isEmpty() || description.isEmpty() || price == 0.0 || imageUrlValue.isBlank()) {
             _addMenuItemEvent.tryEmit(AddMenuItemEvent.ShowErrorMessage("Please fill all fields"))
             return
         }
         viewModelScope.launch {
             _addMenuItemState.value = AddMenuItemState.Loading
-            val imageUrl = uploadImage(imageUri = imageUrl.value!!)
-            if (imageUrl == null) {
-                _addMenuItemState.value = AddMenuItemState.Error("Failed to upload image")
-                return@launch
-            }
+            
             val response = safeApiCall {
                 foodApi.addRestaurantMenu(
                     restaurantId,
@@ -91,7 +95,7 @@ class AddMenuItemViewModel @Inject constructor(
                         name = name,
                         description = description,
                         price = price,
-                        imageUrl = imageUrl,
+                        imageUrl = imageUrlValue,
                         restaurantId = restaurantId
                     )
                 )

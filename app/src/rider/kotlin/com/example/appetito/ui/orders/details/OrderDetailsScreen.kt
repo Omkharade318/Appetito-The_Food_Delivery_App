@@ -49,6 +49,7 @@ import com.example.appetito.ui.features.orders.order_map.OrderTrackerMapView
 import com.example.appetito.ui.features.notifications.ErrorScreen
 import com.example.appetito.ui.features.notifications.LoadingScreen
 import com.example.appetito.ui.theme.Orange
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -308,7 +309,8 @@ fun BoxContentWrapper(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                         viewModel = viewModel,
-                        order = order
+                        order = order,
+                        initialLocation = viewModel.riderLocation.collectAsStateWithLifecycle().value
                     )
                     
                     Surface(
@@ -348,12 +350,14 @@ fun BoxContentWrapper(
 fun BoxContentMap(
     modifier: Modifier,
     viewModel: OrderDetailsViewModel,
-    order: Order
+    order: Order,
+    initialLocation: LatLng? = null
     ) {
     OrderTrackerMapView(
         modifier = modifier,
         viewModel = viewModel,
-        order = order
+        order = order,
+        initialLocation = initialLocation
     )
 }
 

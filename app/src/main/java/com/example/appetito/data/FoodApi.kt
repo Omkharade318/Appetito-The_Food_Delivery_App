@@ -1,5 +1,7 @@
 package com.example.appetito.data
 
+import com.example.appetito.data.models.Ad
+import com.example.appetito.data.models.AdListResponse
 import com.example.appetito.data.models.AddToCartRequest
 import com.example.appetito.data.models.AddToCartResponse
 import com.example.appetito.data.models.Address
@@ -150,6 +152,22 @@ interface FoodApi {
     @GET("/rider/deliveries/active")
     suspend fun getActiveDeliveries(): Response<RiderDeliveryOrderListResponse>
 
+    @GET("/ads")
+    suspend fun getAds(): Response<AdListResponse>
 
+    @POST("/ads")
+    suspend fun createAd(@Body ad: Ad): Response<GenericMsgResponse>
+
+    @GET("/ads/restaurant/{restaurantId}")
+    suspend fun getAdsByRestaurant(@Path("restaurantId") restaurantId: String): Response<AdListResponse>
+
+    @DELETE("/ads/{id}")
+    suspend fun deleteAd(@Path("id") id: String): Response<GenericMsgResponse>
+
+    @POST("/ads/{id}/click")
+    suspend fun recordAdClick(@Path("id") id: String): Response<GenericMsgResponse>
+
+    @GET("/ads/{id}/analytics")
+    suspend fun getAdAnalytics(@Path("id") id: String): Response<com.example.appetito.data.models.AdAnalytics>
 }
 

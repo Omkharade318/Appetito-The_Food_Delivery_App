@@ -2,6 +2,7 @@ package com.example.appetito.ui.feature.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,6 +33,11 @@ import coil3.compose.AsyncImage
 import com.example.appetito.ui.features.notifications.ErrorScreen
 import com.example.appetito.ui.features.notifications.LoadingScreen
 import com.example.appetito.R
+import com.example.appetito.ui.navigation.CreateAd
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 
 val PrimaryOrange = Color(0xFFFE724C)
 val TextGray = Color(0xFF9796A1)
@@ -71,7 +79,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Image(
-                            painter = painterResource(id = R.drawable.pizza),
+                            painter = painterResource(id = R.drawable.sushi),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -84,7 +92,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                                 .padding(16.dp)
                         ) {
                             Text(
-                                text = "Pizza Palace",
+                                text = "Sushi Express",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
                                 color = Color(0xFF323643)
@@ -111,6 +119,88 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                         }
                     }
                 }
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Button(
+                    onClick = { navController.navigate(CreateAd) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
+                ) {
+                    Text("Create New Advertisement", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+
+                val ads = (uiState.value as HomeViewModel.HomeScreenState.Success).ads
+                if (ads.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Your Active Ads",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF323643),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    ads.forEach { ad ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp), spotColor = Color(0x1A000000))
+                                .background(Color.White, RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    navController.navigate(com.example.appetito.ui.navigation.AdDetails(ad.id)) 
+                                }
+                        ) {
+                            androidx.compose.foundation.layout.Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AsyncImage(
+                                    model = ad.imageUrl,
+                                    contentDescription = ad.title,
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = ad.title,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        color = Color(0xFF323643)
+                                    )
+                                    Text(
+                                        text = "Active",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF4CAF50),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                androidx.compose.material3.IconButton(
+                                    onClick = { viewModel.deleteAd(ad.id) }
+                                ) {
+                                    androidx.compose.material3.Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Default.Delete,
+                                        contentDescription = "Delete Ad",
+                                        tint = Color(0xFFE53935)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             is HomeViewModel.HomeScreenState.Failed -> {

@@ -182,13 +182,23 @@ fun OrderDetailsScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Map View
+                    // Map View and Rider Info
                     if (order.status == OrdersUtils.OrderStatus.OUT_FOR_DELIVERY.name) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        Text(
+                            text = "Track Order",
+                            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF323643))
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
                         OrderTrackerMapView(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(250.dp)
-                                .clip(RoundedCornerShape(16.dp)),
+                                .height(300.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shadow(4.dp),
                             viewModel = viewModel,
                             order = order
                         )

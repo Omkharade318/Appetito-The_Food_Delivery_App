@@ -3,6 +3,7 @@ package com.example.appetito.ui.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
+import com.example.appetito.data.models.Ad
 import com.example.appetito.data.models.Category
 import com.example.appetito.data.models.Restaurant
 import com.example.appetito.data.remote.ApiResponse
@@ -17,7 +18,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val foodApi: FoodApi,
+    private val session: com.example.appetito.data.FoodHubSession
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
     val uiState: StateFlow<HomeScreenState> = _uiState.asStateFlow()
@@ -27,11 +31,13 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
 
     var categories = emptyList<Category>()
     var restaurants = emptyList<Restaurant>()
+    var ads = emptyList<Ad>()
 
     init {
         viewModelScope.launch {
             categories = getCategories()
             restaurants = getPopularRestaurants()
+            ads = getAds()
 
             if (categories.isNotEmpty() && restaurants.isNotEmpty()) {
                 _uiState.value = HomeScreenState.Success
@@ -60,6 +66,20 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
 
     }
 
+    private suspend fun getAds(): List<Ad> {
+        var list = emptyList<Ad>()
+        val response = safeApiCall {
+            foodApi.getAds()
+        }
+        when (response) {
+            is com.example.appetito.data.remote.ApiResponse.Success -> {
+                list = response.data.data
+            }
+            else -> {}
+        }
+        return list
+    }
+
     private suspend fun getPopularRestaurants(): List<Restaurant> {
         var list = emptyList<Restaurant>()
         val response = safeApiCall {
@@ -82,10 +102,18 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
             _navigationEvent.emit(
                 HomeScreenNavigationEvents.NavigateToDetail(
                     it.name,
-                    it.imageUrl,
+                    it.imageUrl?: "",
                     it.id
                 )
             )
+        }
+    }
+
+    fun onAdSelected(ad: Ad) {
+        viewModelScope.launch {
+            foodApi.recordAdClick(ad.id)
+            session.storeAdId(ad.id)
+            _navigationEvent.emit(HomeScreenNavigationEvents.NavigateToAdDetail(ad))
         }
     }
 
@@ -98,5 +126,6 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
     sealed class HomeScreenNavigationEvents {
         data class NavigateToDetail(val name: String, val imageUrl: String, val id: String) :
             HomeScreenNavigationEvents()
+        data class NavigateToAdDetail(val ad: Ad) : HomeScreenNavigationEvents()
     }
 }

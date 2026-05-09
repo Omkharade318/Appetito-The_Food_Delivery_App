@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -32,22 +33,19 @@ open class LocationUpdateSocketRepository @Inject constructor(
             try {
                 val currentLocation = getUserLocation()
                 socketService.connect(
-                    orderID, riderID, currentLocation.latitude, currentLocation.longitude
+                    orderID, riderID, currentLocation?.latitude, currentLocation?.longitude, "RIDER"
                 )
                 _socketConnection.value = SocketConnection.Connected
                 locationManager.startLocationUpdate()
 
-                while (socketConnection.value == SocketConnection.Connected) {
-                    locationManager.locationUpdate.collectLatest {
-                        if (it != null) {
-                            val item = SocketLocationModel(
-                                orderID, riderID, it.latitude, it.longitude
-                            )
-                            Log.d("LocationUpdate", "Location: $item")
-                            socketService.sendMessage(Json.encodeToString(item))
-                        }
+                locationManager.locationUpdate.collectLatest {
+                    if (it != null && socketConnection.value == SocketConnection.Connected) {
+                        val item = SocketLocationModel(
+                            orderID, riderID, it.latitude, it.longitude
+                        )
+                        Log.d("LocationUpdate", "Location: $item")
+                        socketService.sendMessage(Json.encodeToString(item))
                     }
-
                 }
             } catch (e: Exception) {
                 _socketConnection.value = SocketConnection.Disconnected
@@ -73,8 +71,13 @@ open class LocationUpdateSocketRepository @Inject constructor(
         socketService.sendMessage(message)
     }
 
-    suspend fun getUserLocation(): LatLng {
-        return LatLng(0.0, 0.0)
+    suspend fun getUserLocation(): LatLng? {
+        return try {
+            val location = locationManager.getLocation().firstOrNull()
+            location?.let { LatLng(it.latitude, it.longitude) }
+        } catch (e: Exception) {
+            null
+        }
     }
 
 }

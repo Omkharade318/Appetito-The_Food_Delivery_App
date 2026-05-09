@@ -1,10 +1,8 @@
 package com.example.appetito.ui.feature.menu.add
 
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -39,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.appetito.ui.FoodHubTextField
-import com.example.appetito.ui.navigation.ImagePicker
 import kotlinx.coroutines.flow.collectLatest
 
 val PrimaryOrange = Color(0xFFFE724C)
@@ -56,16 +53,10 @@ fun AddMenuItemScreen(
     val description = viewModel.description.collectAsStateWithLifecycle()
     val price = viewModel.price.collectAsStateWithLifecycle()
     val uiState = viewModel.addMenuItemState.collectAsStateWithLifecycle()
-    val selectedImage = viewModel.imageUrl.collectAsStateWithLifecycle()
 
-    val imageUri =
-        navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<Uri?>("imageUri", null)
-            ?.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = imageUri?.value) {
-        imageUri?.value?.let {
-            viewModel.onImageUrlChange(it)
-        }
-    }
+    // 1. Collect the new String field from the ViewModel
+    val imageUrlString = viewModel.imageUrlString.collectAsStateWithLifecycle()
+
     LaunchedEffect(key1 = true) {
         viewModel.addMenuItemEvent.collectLatest {
             when (it) {
@@ -76,18 +67,14 @@ fun AddMenuItemScreen(
                     navController.previousBackStackEntry?.savedStateHandle?.set("added", true)
                     navController.popBackStack()
                 }
-
-                is AddMenuItemViewModel.AddMenuItemEvent.AddNewImage -> {
-                    navController.navigate(ImagePicker)
-                }
-
                 is AddMenuItemViewModel.AddMenuItemEvent.ShowErrorMessage -> {
                     Toast.makeText(navController.context, it.message, Toast.LENGTH_SHORT).show()
                 }
+                else -> {}
             }
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -111,6 +98,7 @@ fun AddMenuItemScreen(
                 .padding(20.dp)
         ) {
             Column {
+                // Image Preview Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -121,31 +109,32 @@ fun AddMenuItemScreen(
                             width = 2.dp,
                             color = PrimaryOrange.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable { viewModel.onImageClicked() },
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (selectedImage.value == null) {
+                    // 2. Check if the String is blank
+                    if (imageUrlString.value.isBlank()) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add Image",
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Image Preview",
                                 tint = PrimaryOrange,
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Tap to upload image",
+                                text = "Image Preview",
                                 color = TextGray,
                                 fontSize = 14.sp
                             )
                         }
                     } else {
+                        // 3. Pass the string directly to AsyncImage
                         AsyncImage(
-                            model = selectedImage.value,
+                            model = imageUrlString.value,
                             contentDescription = "Food Image",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -155,15 +144,25 @@ fun AddMenuItemScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // 4. Use the new String field here
+                FoodHubTextField(
+                    value = imageUrlString.value,
+                    onValueChange = { viewModel.onImageUrlStringChange(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = "Image URL") }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 FoodHubTextField(
                     value = name.value,
                     onValueChange = { viewModel.onNameChange(it) },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = "Item Name") }
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 FoodHubTextField(
                     value = description.value,
                     onValueChange = { viewModel.onDescriptionChange(it) },
@@ -171,9 +170,9 @@ fun AddMenuItemScreen(
                     label = { Text(text = "Description") },
                     singleLine = false
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 FoodHubTextField(
                     value = price.value,
                     onValueChange = { viewModel.onPriceChange(it) },

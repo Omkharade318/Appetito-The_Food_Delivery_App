@@ -29,4 +29,16 @@ class FoodHubSession(val context: Context) {
         }
         return null
     }
+
+    fun storeAdId(adId: String) {
+        sharedPrefs.edit().putString("adId", adId).apply()
+    }
+
+    fun getAdId(): String? {
+        return sharedPrefs.getString("adId", null)
+    }
+
+    fun clearAdId() {
+        sharedPrefs.edit().remove("adId").apply()
+    }
 }
