@@ -8,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.appetito.restaurant" />
-                  <option name="mobileSdkAppId" value="1:34973644075:android:b7504cc5a841c265ffc16e" />
+                  <option name="appId" value="com.example.appetito" />
+                  <option name="mobileSdkAppId" value="1:34973644075:android:f8652f3cdb7b45ffffc16e" />
                   <option name="projectId" value="appetito-97fa8" />
                   <option name="projectNumber" value="34973644075" />
                 </ConnectionSetting>

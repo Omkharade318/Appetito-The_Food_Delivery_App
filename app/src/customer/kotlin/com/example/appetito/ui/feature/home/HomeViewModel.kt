@@ -102,7 +102,7 @@ class HomeViewModel @Inject constructor(
             _navigationEvent.emit(
                 HomeScreenNavigationEvents.NavigateToDetail(
                     it.name,
-                    it.imageUrl,
+                    it.imageUrl?: "",
                     it.id
                 )
             )
