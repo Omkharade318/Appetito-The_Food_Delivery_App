@@ -11,14 +11,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-abstract class OrderDetailsBaseViewModel (val repository: LocationUpdateBaseRepository) :
+abstract class OrderDetailsBaseViewModel (open val repository: LocationUpdateBaseRepository) :
     ViewModel() {
     private val _locationUpdate = MutableStateFlow<SocketLocation?>(null)
     val locationUpdate = _locationUpdate.asStateFlow()
-
-    init {
-        processLocation()
-    }
 
     private fun processLocation() {
         viewModelScope.launch {
@@ -40,6 +36,7 @@ abstract class OrderDetailsBaseViewModel (val repository: LocationUpdateBaseRepo
 
     protected fun connectSocket(orderID: String, riderId: String) {
         repository.connect(orderID, riderId)
+        processLocation()
     }
 
     protected fun disconnectSocket() {

@@ -8,7 +8,8 @@ interface SocketService {
         orderID: String,
         riderID: String,
         lat: Double?,
-        lng: Double?
+        lng: Double?,
+        role: String
     )
 
     fun disconnect()

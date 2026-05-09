@@ -10,7 +10,7 @@ class CustomerLocationUpdateSocketRepository @Inject constructor(socketService: 
     override fun connect(orderID: String, riderID: String) {
         try {
             socketService.connect(
-                orderID, riderID, null, null
+                orderID, riderID, null, null, "CUSTOMER"
             )
         } catch (exception: Exception) {
             exception.printStackTrace()

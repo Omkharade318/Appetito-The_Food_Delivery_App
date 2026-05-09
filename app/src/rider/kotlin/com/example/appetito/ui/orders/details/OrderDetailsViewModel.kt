@@ -7,6 +7,7 @@ import com.example.appetito.data.FoodApi
 import com.example.appetito.data.models.Order
 import com.example.appetito.data.remote.ApiResponse
 import com.example.appetito.data.remote.safeApiCall
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,13 +21,16 @@ import javax.inject.Inject
 @HiltViewModel
 class OrderDetailsViewModel @Inject constructor(
     val foodApi: FoodApi,
-    repository: LocationUpdateSocketRepository
+    override val repository: LocationUpdateSocketRepository
 ) : OrderDetailsBaseViewModel(repository) {
 
     val listOfStatus = OrdersUtils.OrderStatus.entries.map { it.name }
 
     private val _uiState = MutableStateFlow<OrderDetailsUiState>(OrderDetailsUiState.Loading)
     val uiState = _uiState.asStateFlow()
+
+    private val _riderLocation = MutableStateFlow<LatLng?>(null)
+    val riderLocation = _riderLocation.asStateFlow()
 
     private val _event = MutableSharedFlow<OrderDetailsEvent?>()
     val event = _event.asSharedFlow()
@@ -39,6 +43,7 @@ class OrderDetailsViewModel @Inject constructor(
             when (result) {
                 is ApiResponse.Success -> {
                     if (result.data.status == OrdersUtils.OrderStatus.OUT_FOR_DELIVERY.name) {
+                        _riderLocation.value = repository.getUserLocation()
                         _uiState.value = OrderDetailsUiState.OrderDelivery(result.data)
                         result.data.riderId?.let {
                             connectSocket(orderID, it)

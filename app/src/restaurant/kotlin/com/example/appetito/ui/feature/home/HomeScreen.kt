@@ -79,7 +79,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Image(
-                            painter = painterResource(id = R.drawable.pizza),
+                            painter = painterResource(id = R.drawable.sushi),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -92,7 +92,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                                 .padding(16.dp)
                         ) {
                             Text(
-                                text = "Pizza Palace",
+                                text = "Sushi Express",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
                                 color = Color(0xFF323643)

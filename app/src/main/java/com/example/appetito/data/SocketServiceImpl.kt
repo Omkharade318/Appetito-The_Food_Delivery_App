@@ -25,12 +25,13 @@ class SocketServiceImpl @Inject constructor() : SocketService {
         riderID: String,
         lat: Double?,
         lng: Double?,
+        role: String,
         type: String = "LOCATION_UPDATE"
     ): String {
         if (lat == null || lng == null) {
-            return "$SOCKET_ADDRESS/track/$orderID"
+            return "$SOCKET_ADDRESS/track/$orderID?role=$role"
         }
-        return "$SOCKET_ADDRESS/track/$orderID?riderId=$riderID&latitude=$lat&longitude=$lng&type=$type"
+        return "$SOCKET_ADDRESS/track/$orderID?riderId=$riderID&latitude=$lat&longitude=$lng&type=$type&role=$role"
     }
 
     override fun connect(
@@ -38,13 +39,15 @@ class SocketServiceImpl @Inject constructor() : SocketService {
         riderID: String,
         lat: Double?,
         lng: Double?,
+        role: String
     ) {
         val builder = Request.Builder().url(
             createURl(
                 orderID,
                 riderID,
                 lat,
-                lng
+                lng,
+                role
             )
         ).build()
         val client = OkHttpClient.Builder().build()
