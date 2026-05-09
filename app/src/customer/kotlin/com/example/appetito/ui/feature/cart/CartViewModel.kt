@@ -21,7 +21,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
+class CartViewModel @Inject constructor(
+    val foodApi: FoodApi,
+    private val session: com.example.appetito.data.FoodHubSession
+): ViewModel(){
 
     private val _uiState = MutableStateFlow<CartUiState>(CartUiState.Loading)
     val uiState = _uiState
@@ -136,8 +139,9 @@ class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
     fun checkout() {
         viewModelScope.launch {
             _uiState.value = CartUiState.Loading
+            val adId = session.getAdId()
             val paymentDetails =
-                safeApiCall { foodApi.getPaymentIntent(PaymentIntentRequest(address.value!!.id!!)) }
+                safeApiCall { foodApi.getPaymentIntent(PaymentIntentRequest(address.value!!.id!!, adId)) }
 
             when (paymentDetails) {
                 is ApiResponse.Success -> {
@@ -189,6 +193,7 @@ class CartViewModel @Inject constructor(val foodApi: FoodApi): ViewModel(){
                 }
             when (response) {
                 is ApiResponse.Success -> {
+                    session.clearAdId()
                     _event.emit(CartEvent.OrderSuccess(response.data.orderId))
                     _uiState.value = CartUiState.Success(cartResponse!!)
                     getCart()

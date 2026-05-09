@@ -58,3 +58,5 @@ object AddMenu : NavRoutes
 object ImagePicker : NavRoutes
 @Serializable
 object CreateAd : NavRoutes
+@Serializable
+data class AdDetails(val adId: String) : NavRoutes

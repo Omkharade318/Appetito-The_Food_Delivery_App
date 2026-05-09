@@ -2,6 +2,7 @@ package com.example.appetito.ui.feature.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -153,6 +154,9 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                                 .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp), spotColor = Color(0x1A000000))
                                 .background(Color.White, RoundedCornerShape(12.dp))
                                 .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    navController.navigate(com.example.appetito.ui.navigation.AdDetails(ad.id)) 
+                                }
                         ) {
                             androidx.compose.foundation.layout.Row(
                                 modifier = Modifier

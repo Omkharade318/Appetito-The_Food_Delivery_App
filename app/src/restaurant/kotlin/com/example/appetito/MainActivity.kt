@@ -263,6 +263,11 @@ class MainActivity : BaseFoodHubActivity() {
                                 shouldShowBottomNav.value = false
                                 CreateAdScreen(navController)
                             }
+                            composable<com.example.appetito.ui.navigation.AdDetails> {
+                                shouldShowBottomNav.value = false
+                                val adId = it.toRoute<com.example.appetito.ui.navigation.AdDetails>().adId
+                                com.example.appetito.ui.feature.home.AdDetailsScreen(navController, adId)
+                            }
                         }
                     }
 

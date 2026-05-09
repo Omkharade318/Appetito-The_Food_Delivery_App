@@ -18,7 +18,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val foodApi: FoodApi,
+    private val session: com.example.appetito.data.FoodHubSession
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
     val uiState: StateFlow<HomeScreenState> = _uiState.asStateFlow()
@@ -108,6 +111,8 @@ class HomeViewModel @Inject constructor(private val foodApi: FoodApi) : ViewMode
 
     fun onAdSelected(ad: Ad) {
         viewModelScope.launch {
+            foodApi.recordAdClick(ad.id)
+            session.storeAdId(ad.id)
             _navigationEvent.emit(HomeScreenNavigationEvents.NavigateToAdDetail(ad))
         }
     }

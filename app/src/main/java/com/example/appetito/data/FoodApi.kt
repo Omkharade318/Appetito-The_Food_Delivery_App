@@ -163,5 +163,11 @@ interface FoodApi {
 
     @DELETE("/ads/{id}")
     suspend fun deleteAd(@Path("id") id: String): Response<GenericMsgResponse>
+
+    @POST("/ads/{id}/click")
+    suspend fun recordAdClick(@Path("id") id: String): Response<GenericMsgResponse>
+
+    @GET("/ads/{id}/analytics")
+    suspend fun getAdAnalytics(@Path("id") id: String): Response<com.example.appetito.data.models.AdAnalytics>
 }
 
