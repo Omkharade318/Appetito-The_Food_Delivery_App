@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
 import com.example.appetito.data.FoodHubSession
+import com.example.appetito.data.models.CustomizationGroup
+import com.example.appetito.data.models.CustomizationOption
 import com.example.appetito.data.models.FoodItem
 import com.example.appetito.data.remote.ApiResponse
 import com.example.appetito.data.remote.safeApiCall
@@ -74,6 +76,52 @@ class AddMenuItemViewModel @Inject constructor(
         _imageUrlString.value = newUrl
     }
 
+    private val _customizationGroups = MutableStateFlow<List<CustomizationGroup>>(emptyList())
+    val customizationGroups = _customizationGroups.asStateFlow()
+
+    fun addCustomizationGroup() {
+        _customizationGroups.value += CustomizationGroup(name = "", options = emptyList())
+    }
+
+    fun removeCustomizationGroup(index: Int) {
+        val list = _customizationGroups.value.toMutableList()
+        list.removeAt(index)
+        _customizationGroups.value = list
+    }
+
+    fun updateCustomizationGroup(index: Int, group: CustomizationGroup) {
+        val list = _customizationGroups.value.toMutableList()
+        list[index] = group
+        _customizationGroups.value = list
+    }
+
+    fun addOptionToGroup(groupIndex: Int) {
+        val groups = _customizationGroups.value.toMutableList()
+        val group = groups[groupIndex]
+        val options = group.options.toMutableList()
+        options.add(CustomizationOption(name = "", price = 0.0))
+        groups[groupIndex] = group.copy(options = options)
+        _customizationGroups.value = groups
+    }
+
+    fun removeOptionFromGroup(groupIndex: Int, optionIndex: Int) {
+        val groups = _customizationGroups.value.toMutableList()
+        val group = groups[groupIndex]
+        val options = group.options.toMutableList()
+        options.removeAt(optionIndex)
+        groups[groupIndex] = group.copy(options = options)
+        _customizationGroups.value = groups
+    }
+
+    fun updateOptionInGroup(groupIndex: Int, optionIndex: Int, option: CustomizationOption) {
+        val groups = _customizationGroups.value.toMutableList()
+        val group = groups[groupIndex]
+        val options = group.options.toMutableList()
+        options[optionIndex] = option
+        groups[groupIndex] = group.copy(options = options)
+        _customizationGroups.value = groups
+    }
+
     fun addMenuItem() {
         val name = name.value
         val description = description.value
@@ -96,7 +144,8 @@ class AddMenuItemViewModel @Inject constructor(
                         description = description,
                         price = price,
                         imageUrl = imageUrlValue,
-                        restaurantId = restaurantId
+                        restaurantId = restaurantId,
+                        customizations = customizationGroups.value
                     )
                 )
             }

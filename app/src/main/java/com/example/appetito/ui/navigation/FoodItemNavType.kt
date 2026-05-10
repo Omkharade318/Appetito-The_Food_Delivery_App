@@ -12,23 +12,18 @@ val foodItemNavType = object : NavType<FoodItem>(false){
         bundle: Bundle,
         key: String
     ): FoodItem? {
-        return parseValue(bundle.getString(key).toString()).copy(
-            imageUrl = URLDecoder.decode(
-                parseValue(bundle.getString(key).toString()).imageUrl,
-                "UTF-8"
-            )
-        )
+        val value = bundle.getString(key)
+        return value?.let { parseValue(it) }
     }
 
     override fun parseValue(value: String): FoodItem {
-        return Json.decodeFromString(FoodItem.serializer(), value)
+        val decodedValue = URLDecoder.decode(value, "UTF-8")
+        return Json.decodeFromString(FoodItem.serializer(), decodedValue)
     }
 
     override fun serializeAsValue(value: FoodItem): String {
-        return Json.encodeToString(FoodItem.serializer(), value.copy(
-                imageUrl = URLEncoder.encode(value.imageUrl, "UTF-8")
-            )
-        )
+        val jsonString = Json.encodeToString(FoodItem.serializer(), value)
+        return URLEncoder.encode(jsonString, "UTF-8")
     }
 
     override fun put(

@@ -412,12 +412,21 @@ fun CartItemView(
                 style = TextStyle(fontSize = 13.sp, color = TextGray)
             )
 
+            cartItem.selectedCustomizations?.forEach { customization ->
+                Text(
+                    text = "+ ${customization.optionName} ($${String.format("%.2f", customization.price)})",
+                    style = TextStyle(fontSize = 12.sp, color = TextGray)
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
 
                 // 1. Calculate the total price for this specific row
-                val totalItemPrice = cartItem.menuItemId.price * cartItem.quantity
+                val basePrice = cartItem.menuItemId.price
+                val customizationsPrice = cartItem.selectedCustomizations?.sumOf { it.price } ?: 0.0
+                val totalItemPrice = (basePrice + customizationsPrice) * cartItem.quantity
 
                 // 2. Display the calculated total, formatted to 2 decimal places
                 Text(
