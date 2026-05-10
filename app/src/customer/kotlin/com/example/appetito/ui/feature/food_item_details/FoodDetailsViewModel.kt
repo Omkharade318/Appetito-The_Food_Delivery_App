@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appetito.data.FoodApi
 import com.example.appetito.data.models.AddToCartRequest
+import com.example.appetito.data.models.CustomizationGroup
+import com.example.appetito.data.models.CustomizationOption
+import com.example.appetito.data.models.SelectedCustomization
 import com.example.appetito.data.remote.ApiResponse
 import com.example.appetito.data.remote.safeApiCall
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +39,37 @@ class FoodDetailsViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel
         }
     }
 
+    private val _selectedCustomizations = MutableStateFlow<List<SelectedCustomization>>(emptyList())
+    val selectedCustomizations = _selectedCustomizations.asStateFlow()
+
+    fun toggleCustomization(group: CustomizationGroup, option: CustomizationOption) {
+        val current = _selectedCustomizations.value.toMutableList()
+        val existingIndex = current.indexOfFirst { it.optionId == option.id }
+
+        if (existingIndex != -1) {
+            current.removeAt(existingIndex)
+        } else {
+            // Check max selections
+            val groupSelections = current.filter { it.groupId == group.id }
+            if (group.maxSelections == 1) {
+                // Single select: remove others from same group
+                current.removeAll { it.groupId == group.id }
+            } else if (groupSelections.size >= group.maxSelections) {
+                // Multi select: don't add if already at max
+                return
+            }
+
+            current.add(SelectedCustomization(
+                groupId = group.id,
+                groupName = group.name,
+                optionId = option.id,
+                optionName = option.name,
+                price = option.price
+            ))
+        }
+        _selectedCustomizations.value = current
+    }
+
     fun addToCart(restaurantId: String, foodItemId: String){
         viewModelScope.launch {
             _uiState.value = FoodDetailsUiState.Loading
@@ -44,7 +78,8 @@ class FoodDetailsViewModel @Inject constructor(val foodApi: FoodApi) : ViewModel
                     request = AddToCartRequest(
                         restaurantId  = restaurantId,
                         menuItemId = foodItemId,
-                        quantity = _quantity.value
+                        quantity = _quantity.value,
+                        selectedCustomizations = _selectedCustomizations.value
                     )
                 )
 

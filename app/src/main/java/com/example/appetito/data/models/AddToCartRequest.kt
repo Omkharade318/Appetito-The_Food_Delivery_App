@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class AddToCartRequest(
     val restaurantId: String,
     val menuItemId: String,
-    val quantity: Int
+    val quantity: Int,
+    val selectedCustomizations: List<SelectedCustomization>? = null
 )

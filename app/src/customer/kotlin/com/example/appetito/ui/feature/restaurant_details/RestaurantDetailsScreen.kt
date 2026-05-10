@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,12 +23,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.DirectionsBike
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,9 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -48,6 +55,10 @@ import com.example.appetito.ui.features.common.FoodItemView
 import com.example.appetito.ui.gridItems
 import com.example.appetito.ui.navigation.FoodDetails
 import ir.kaaveh.sdpcompose.sdp
+
+val PrimaryOrange = Color(0xFFFE724C)
+val TextGray = Color(0xFF9796A1)
+val BgLight = Color(0xFFF9F9FB)
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -62,63 +73,88 @@ fun SharedTransitionScope.RestaurantDetailsScreen(
     LaunchedEffect(restaurantID) {
         viewModel.getFoodItem(restaurantID)
     }
+
     val uiState = viewModel.uiState.collectAsState()
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item {
-            RestaurantDetailsHeader(imageUrl = imageUrl,
-                restaurantID = restaurantID,
-                animatedVisibilityScope = animatedVisibilityScope,
-                onBackButton = { navController.popBackStack() },
-                onFavoriteButton = { })
-        }
-        item {
-            RestaurantDetails(
-                title = name,
-                description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum aliquam. Nullam nec nunc nec libero fermentum aliquam. Nullam nec nunc nec libero fermentum aliquam.",
-                animatedVisibilityScope = animatedVisibilityScope,
-                restaurantID = restaurantID
-            )
-        }
-        when (uiState.value) {
-            is RestaurantViewModel.RestaurantEvent.Loading -> {
-                item {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator()
-                        Text(text = "Loading")
-                    }
-                }
+
+    Box(modifier = Modifier.fillMaxSize().background(BgLight)) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+            // 1. Header Image
+            item {
+                RestaurantDetailsHeader(
+                    imageUrl = imageUrl,
+                    restaurantID = restaurantID,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    onBackButton = { navController.popBackStack() },
+                    onFavoriteButton = { }
+                )
             }
 
-            is RestaurantViewModel.RestaurantEvent.Success -> {
-                val foodItems =
-                    (uiState.value as RestaurantViewModel.RestaurantEvent.Success).foodItems
-                if (foodItems.isNotEmpty()) {
-                    gridItems(foodItems, 2) { foodItem ->
-                        FoodItemView(footItem = foodItem, animatedVisibilityScope) {
-                            navController.navigate(
-                                FoodDetails(foodItem)
-                            )
+            // 2. Overlapping Details Card
+            item {
+                RestaurantDetails(
+                    title = name,
+                    description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum aliquam. Nullam nec nunc nec libero fermentum aliquam.",
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    restaurantID = restaurantID
+                )
+            }
+
+            // 3. Menu Content
+            when (uiState.value) {
+                is RestaurantViewModel.RestaurantEvent.Loading -> {
+                    item {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth().padding(top = 40.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(color = PrimaryOrange)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(text = "Loading Menu...", style = TextStyle(color = TextGray))
                         }
                     }
-                } else {
-                    item {
-                        Text(text = "No Food Items")
+                }
+
+                is RestaurantViewModel.RestaurantEvent.Success -> {
+                    val foodItems = (uiState.value as RestaurantViewModel.RestaurantEvent.Success).foodItems
+                    if (foodItems.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Popular Menu",
+                                style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF323643)),
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                            )
+                        }
+
+                        gridItems(foodItems, 2) { foodItem ->
+                            Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                                FoodItemView(footItem = foodItem, animatedVisibilityScope) {
+                                    navController.navigate(FoodDetails(foodItem))
+                                }
+                            }
+                        }
+
+                        item { Spacer(modifier = Modifier.height(32.dp)) }
+                    } else {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+                                Text(text = "No items available", style = TextStyle(fontSize = 16.sp, color = TextGray))
+                            }
+                        }
                     }
                 }
 
-            }
-
-            is RestaurantViewModel.RestaurantEvent.Error -> {
-                item {
-                    Text(text = "Error")
+                is RestaurantViewModel.RestaurantEvent.Error -> {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+                            Text(text = "Failed to load menu", style = TextStyle(color = Color.Red))
+                        }
+                    }
                 }
-            }
 
-            RestaurantViewModel.RestaurantEvent.Nothing -> {}
+                RestaurantViewModel.RestaurantEvent.Nothing -> {}
+            }
         }
     }
 }
@@ -126,58 +162,77 @@ fun SharedTransitionScope.RestaurantDetailsScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.RestaurantDetails(
-    title: String, description: String, restaurantID: String,
+    title: String,
+    description: String,
+    restaurantID: String,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .offset(y = (-40).dp) // This pulls the card UP to overlap the image
+            .padding(horizontal = 24.dp)
+            .shadow(elevation = 12.dp, shape = RoundedCornerShape(24.dp), spotColor = Color(0x1A000000))
+            .background(Color.White, RoundedCornerShape(24.dp))
+            .padding(24.dp)
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.sharedElement(
-                state = rememberSharedContentState(key = "title/${restaurantID}"),
-                animatedVisibilityScope
-            )
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.size(8.dp))
+        Column {
             Text(
-                text = "4.5",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                text = title,
+                style = TextStyle(fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color(0xFF323643)),
+                modifier = Modifier.sharedElement(
+                    state = rememberSharedContentState(key = "title/${restaurantID}"),
+                    animatedVisibilityScope
+                )
             )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = "(30+)",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            TextButton(onClick = { /*TODO*/ }) {
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Rating Row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = Color(0xFFFFC529)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(text = "4.5", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF323643)))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "(30+)", style = TextStyle(fontSize = 12.sp, color = TextGray))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = " View All Reviews",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    text = "See Reviews",
+                    style = TextStyle(fontSize = 12.sp, color = PrimaryOrange, textDecoration = TextDecoration.Underline, fontWeight = FontWeight.Medium),
+                    modifier = Modifier.clickable { /* Handle click */ }
                 )
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Delivery Info Row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                InfoPill(icon = Icons.Outlined.DirectionsBike, text = "Free Delivery")
+                Spacer(modifier = Modifier.width(16.dp))
+                InfoPill(icon = Icons.Outlined.AccessTime, text = "10-15 mins")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = description,
+                style = TextStyle(fontSize = 14.sp, color = TextGray, lineHeight = 22.sp)
+            )
         }
-        Spacer(modifier = Modifier.size(8.dp))
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp)
-        )
+    }
+}
+
+@Composable
+fun InfoPill(icon: ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(imageVector = icon, contentDescription = null, tint = PrimaryOrange, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text = text, style = TextStyle(fontSize = 13.sp, color = TextGray))
     }
 }
 
@@ -190,38 +245,53 @@ fun SharedTransitionScope.RestaurantDetailsHeader(
     onBackButton: () -> Unit,
     onFavoriteButton: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp) // Made taller to accommodate the overlap
+    ) {
         AsyncImage(
-            model = imageUrl, contentDescription = null, modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
                 .sharedElement(
                     state = rememberSharedContentState(key = "image/${restaurantID}"),
                     animatedVisibilityScope
-                )
-                .clip(
-                    RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
-                ), contentScale = ContentScale.Crop
+                ),
+            contentScale = ContentScale.Crop
         )
-        IconButton(
-            onClick = onBackButton,
+
+        // App Bar Overlay
+        Row(
             modifier = Modifier
-                .padding(16.dp)
-                .size(48.dp)
-                .align(Alignment.TopStart)
+                .fillMaxWidth()
+                .padding(top = 40.dp, start = 24.dp, end = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = null)
-        }
-        IconButton(
-            onClick = onFavoriteButton,
-            modifier = Modifier
-                .padding(16.dp)
-                .size(48.dp)
-                .align(Alignment.TopEnd)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_favourite), contentDescription = null
-            )
+            // Back Button
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .shadow(12.dp, shape = RoundedCornerShape(12.dp), spotColor = Color(0x33000000))
+                    .background(Color.White, RoundedCornerShape(12.dp))
+                    .clickable { onBackButton() },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+            }
+
+            // Favorite Button
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .shadow(12.dp, shape = CircleShape, spotColor = PrimaryOrange.copy(alpha = 0.5f))
+                    .background(Color.White, CircleShape)
+                    .clickable { onFavoriteButton() },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(painter = painterResource(id = R.drawable.ic_favourite), contentDescription = "Favorite")
+            }
         }
     }
 }

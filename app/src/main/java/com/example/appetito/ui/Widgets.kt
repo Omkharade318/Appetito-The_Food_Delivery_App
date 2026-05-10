@@ -1,5 +1,4 @@
 package com.example.appetito.ui
-
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
@@ -8,6 +7,7 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavBackStackEntry
@@ -59,85 +60,84 @@ import com.example.appetito.ui.theme.Primary
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
-
 @Composable
 fun GroupSocialButtons(
     color: Color = Color.White,
     viewModel: BaseAuthViewModel
 ) {
-
     Column {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp),
+                modifier = Modifier.weight(1f),
                 thickness = 1.dp,
-                color = color
+                color = color.copy(alpha = 0.3f)
             )
             Text(
                 text = stringResource(id = R.string.sign_in_with),
-                color = color,
-                modifier = Modifier.padding(8.dp)
+                color = color.copy(alpha = 0.8f),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
             HorizontalDivider(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
+                modifier = Modifier.weight(1f),
                 thickness = 1.dp,
-                color = color
+                color = color.copy(alpha = 0.3f)
             )
         }
+
         val context = LocalContext.current as ComponentActivity
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(16.dp) // Equal spacing between buttons
         ) {
-            com.example.appetito.ui.SocialButton(
+            SocialButton(
+                modifier = Modifier.weight(1f),
                 icon = R.drawable.ic_facebook,
                 title = R.string.sign_with_facebook,
                 onClick = { viewModel.onFacebookClicked(context) }
             )
-            com.example.appetito.ui.SocialButton(
+            SocialButton(
+                modifier = Modifier.weight(1f),
                 icon = R.drawable.ic_google,
                 title = R.string.sign_with_google,
                 onClick = { viewModel.onGoogleClicked(context) }
             )
         }
-
     }
 }
+
 @Composable
 fun SocialButton(
+    modifier: Modifier = Modifier,
     icon: Int,
     title: Int,
     onClick: () -> Unit
 ){
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White
-        ),
-        shape = RoundedCornerShape(32.dp),
+        modifier = modifier.height(54.dp), // Taller touch target
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+        shape = RoundedCornerShape(30.dp), // Perfect pill shape
+        border = BorderStroke(1.dp, Color(0xFFEAEAEC)) // Subtle border so it doesn't get lost on white backgrounds
     ) {
-        Row(
-            modifier = Modifier.height(38.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
             Image(
                 painter = painterResource(id = icon),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp)
             )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(text = stringResource(id = title), color = Color.Black)
+            Spacer(modifier = Modifier.size(12.dp))
+            Text(
+                text = stringResource(id = title),
+                color = Color(0xFF323643),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp
+            )
         }
     }
 }
@@ -161,34 +161,33 @@ fun FoodHubTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = false,
+    singleLine: Boolean = true, // Default to true for standard inputs
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = RoundedCornerShape(12.dp),
+    shape: Shape = RoundedCornerShape(16.dp), // Softer corners
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors().copy(
         focusedIndicatorColor = Primary,
-        unfocusedIndicatorColor = Color.LightGray.copy(alpha = 0.4f),
+        unfocusedIndicatorColor = Color(0xFFEAEAEC), // Softer default outline
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color(0xFFFCFCFD) // Slight off-white when unfocused
     )
 ){
-
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(vertical = 6.dp)) {
         label?.let {
-            Row {
-                Spacer(modifier = Modifier.size(4.dp))
+            Row(modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)) {
                 it()
             }
         }
 
-        Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = modifier.height(65.dp),
+            modifier = modifier.fillMaxWidth(), // Removed fixed height so it scales properly
             enabled = enabled,
             readOnly = readOnly,
-            textStyle = textStyle.copy(fontWeight = FontWeight.SemiBold),
-            label = null,
+            textStyle = textStyle.copy(fontWeight = FontWeight.Medium, color = Color(0xFF323643)),
+            label = null, // We keep the label above the text field
             placeholder = placeholder,
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
@@ -211,40 +210,55 @@ fun FoodHubTextField(
 
 @Composable
 fun BasicDialog(title: String, description: String, onClick: () -> Unit) {
-    Surface {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White,
+        shadowElevation = 8.dp
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .padding(16.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = title,
-                fontWeight = FontWeight.Bold
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF323643),
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.size(8.dp))
+
+            Spacer(modifier = Modifier.size(12.dp))
+
             Text(
                 text = description,
+                fontSize = 15.sp,
+                color = Color(0xFF9796A1),
+                textAlign = TextAlign.Center,
+                lineHeight = 22.sp
             )
-            Spacer(modifier = Modifier.size(16.dp))
+
+            Spacer(modifier = Modifier.size(24.dp))
+
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                shape = RoundedCornerShape(16.dp),
-
-                ) {
+                shape = RoundedCornerShape(30.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+            ) {
                 Text(
                     text = stringResource(id = R.string.ok),
                     color = Color.White,
-                    modifier = Modifier.padding(horizontal = 32.dp)
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
     }
 }
-
-
 
 fun LazyListScope.gridItems(
     count: Int,
