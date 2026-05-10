@@ -8,6 +8,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,11 +18,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -35,15 +39,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,13 +65,14 @@ import com.example.appetito.R
 import com.example.appetito.ui.BasicDialog
 import com.example.appetito.ui.FoodHubTextField
 import com.example.appetito.ui.GroupSocialButtons
-import com.example.appetito.ui.features.auth.login.SignInViewModel
 import com.example.appetito.ui.navigation.AuthScreen
 import com.example.appetito.ui.navigation.Home
 import com.example.appetito.ui.navigation.Login
-import com.example.appetito.ui.theme.Primary
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
+val PrimaryOrange = Color(0xFFFE724C)
+val TextGray = Color(0xFF9796A1)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,156 +80,223 @@ fun SignUpScreen(navController: NavController, viewModel: SignUpViewModel = hilt
     val name = viewModel.name.collectAsStateWithLifecycle()
     val email = viewModel.email.collectAsStateWithLifecycle()
     val password = viewModel.password.collectAsStateWithLifecycle()
+
+    // UI States
     val errorMessage = remember { mutableStateOf<String?>(null) }
     val loading = remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) } // State for password toggle
+
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(errorMessage.value) {
-        if (errorMessage.value != null)
-            scope.launch {
-                showDialog = true
-            }
+        if (errorMessage.value != null) {
+            scope.launch { showDialog = true }
+        }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
 
+    val uiState = viewModel.uiState.collectAsState()
+    when (uiState.value) {
+        is SignUpViewModel.SignupEvent.Error -> {
+            loading.value = false
+            errorMessage.value = "Failed"
+        }
+        is SignUpViewModel.SignupEvent.Loading -> {
+            loading.value = true
+            errorMessage.value = null
+        }
+        else -> {
+            loading.value = false
+            errorMessage.value = null
+        }
+    }
 
-        val uiState = viewModel.uiState.collectAsState()
-        when (uiState.value) {
-
-            is SignUpViewModel.SignupEvent.Error -> {
-                // show error
-                loading.value = false
-                errorMessage.value = "Failed"
-            }
-
-            is SignUpViewModel.SignupEvent.Loading -> {
-                loading.value = true
-                errorMessage.value = null
-            }
-
-            else -> {
-                loading.value = false
-                errorMessage.value = null
+    LaunchedEffect(true) {
+        viewModel.navigationEvent.collectLatest { event ->
+            when (event) {
+                is SignUpViewModel.SigupNavigationEvent.NavigateToHome -> {
+                    navController.navigate(Home) {
+                        popUpTo(AuthScreen) { inclusive = true }
+                    }
+                }
+                is SignUpViewModel.SigupNavigationEvent.NavigateToLogin -> {
+                    navController.navigate(Login)
+                }
             }
         }
-        val context = LocalContext.current
-        LaunchedEffect(true) {
-            viewModel.navigationEvent.collectLatest { event ->
-                when (event) {
-                    is SignUpViewModel.SigupNavigationEvent.NavigateToHome -> {
-                        navController.navigate(Home) {
-                            popUpTo(AuthScreen) {
-                                inclusive = true
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        // 1. Background Image (Bottom Layer)
+        Image(
+            painter = painterResource(id = R.drawable.signup_bg),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp),
+            contentScale = ContentScale.Crop
+        )
+
+        // 2. White Card Container (Middle Layer)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            Spacer(modifier = Modifier.height(260.dp)) // Pulls the card slightly higher to fit the extra name field
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                    .padding(horizontal = 24.dp, vertical = 32.dp)
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                    // Header Text
+                    Text(
+                        text = stringResource(id = R.string.sign_up),
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF323643),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Start
+                    )
+                    Text(
+                        text = "Create an account to continue!",
+                        fontSize = 16.sp,
+                        color = TextGray,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 24.dp),
+                        textAlign = TextAlign.Start
+                    )
+
+                    // Input Fields
+                    FoodHubTextField(
+                        value = name.value,
+                        onValueChange = { viewModel.onNameChange(it) },
+                        label = { Text(text = stringResource(id = R.string.full_name), color = TextGray, fontSize = 14.sp) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    FoodHubTextField(
+                        value = email.value,
+                        onValueChange = { viewModel.onEmailChange(it) },
+                        label = { Text(text = stringResource(id = R.string.email), color = TextGray, fontSize = 14.sp) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    FoodHubTextField(
+                        value = password.value,
+                        onValueChange = { viewModel.onPasswordChange(it) },
+                        label = { Text(text = stringResource(id = R.string.password), color = TextGray, fontSize = 14.sp) },
+                        modifier = Modifier.fillMaxWidth(),
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Image(
+                                    painter = painterResource(id = if (passwordVisible) R.drawable.ic_eye else R.drawable.ic_eye_off), // Swap if you have an eye-off icon
+                                    contentDescription = "Toggle Password Visibility",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                    )
+
+                    // Error Message
+                    if (errorMessage.value != null) {
+                        Text(
+                            text = errorMessage.value ?: "",
+                            color = Color(0xFFFF4B4B),
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            textAlign = TextAlign.Start
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Sign Up Button
+                    Button(
+                        onClick = viewModel::onSignUpClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .shadow(elevation = 16.dp, shape = RoundedCornerShape(30.dp), spotColor = PrimaryOrange.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
+                    ) {
+                        AnimatedContent(
+                            targetState = loading.value,
+                            transitionSpec = {
+                                fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.8f) togetherWith
+                                        fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f)
+                            }, label = "Loading State"
+                        ) { targetLoading ->
+                            if (targetLoading) {
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                            } else {
+                                Text(
+                                    text = stringResource(id = R.string.sign_up).uppercase(),
+                                    color = Color.White,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
 
-                    is SignUpViewModel.SigupNavigationEvent.NavigateToLogin -> {
-                        navController.navigate(Login)
-                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Stylized "Already have an account" link
+                    Text(
+                        text = buildAnnotatedString {
+                            append(stringResource(id = R.string.already_have_account) + " ")
+                            withStyle(style = SpanStyle(color = PrimaryOrange, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline)) {
+                                append("Log In")
+                            }
+                        },
+                        fontSize = 14.sp,
+                        color = Color(0xFF323643),
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable { viewModel.onLoginClicked() }
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    GroupSocialButtons(
+                        color = TextGray,
+                        viewModel = viewModel,
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp)) // Bottom padding
                 }
             }
         }
 
-        Image(
-            painter = painterResource(id = R.drawable.auth_bg),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-        Column(
+        // 3. Back Button (Top Layer - Rendered last so it catches clicks!)
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                .padding(top = 40.dp, start = 24.dp)
+                .size(44.dp)
+                .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .clickable { navController.popBackStack() },
+            contentAlignment = Alignment.Center
         ) {
-            Box(modifier = Modifier.weight(1f))
-            Text(
-                text = stringResource(id = R.string.sign_up),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.size(20.dp))
-            FoodHubTextField(
-                value = name.value, onValueChange = { viewModel.onNameChange(it) },
-                label = {
-                    Text(text = stringResource(id = R.string.full_name), color = Color.Gray)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            FoodHubTextField(
-                value = email.value,
-                onValueChange = { viewModel.onEmailChange(it) },
-                label = {
-                    Text(text = stringResource(id = R.string.email), color = Color.Gray)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            FoodHubTextField(
-                value = password.value,
-                onValueChange = { viewModel.onPasswordChange(it) },
-                label = {
-                    Text(text = stringResource(id = R.string.password), color = Color.Gray)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                trailingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_eye),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(text = errorMessage.value ?: "", color = Color.Red)
-            Button(
-                onClick = viewModel::onSignUpClick, modifier = Modifier.height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary)
-            ) {
-                Box {
-                    AnimatedContent(targetState = loading.value,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.8f) togetherWith
-                                    fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f)
-                        }
-                    ) { target ->
-                        if (target) {
-                            CircularProgressIndicator(
-                                color = Color.White,
-                                modifier = Modifier
-                                    .padding(horizontal = 32.dp)
-                                    .size(24.dp)
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(id = R.string.sign_up),
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 32.dp)
-                            )
-                        }
-
-                    }
-
-
-                }
-            }
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(
-                text = stringResource(id = R.string.already_have_account),
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clickable {
-                        viewModel.onLoginClicked()
-                    }
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            GroupSocialButtons(color = Color.Black, viewModel)
+            Image(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
         }
     }
+
     if (showDialog) {
         ModalBottomSheet(onDismissRequest = { showDialog = false }, sheetState = sheetState) {
             BasicDialog(
